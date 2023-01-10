@@ -5,8 +5,8 @@ class ListSpk {
   late List<Spk> results = [];
 
   ListSpk.fromJson(Map<String, dynamic> json) {
-    page = json['page'];
-    json['results'].forEach((spk) {
+    // json['data'] di dapat dari API
+    json['data'].forEach((spk) {
       Spk mv = Spk.fromJson(spk);
       results.add(mv);
     });

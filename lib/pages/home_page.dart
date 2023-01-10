@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:creative_mobile/services/api_service.dart';
 import 'package:creative_mobile/services/shared_service.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +7,7 @@ import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-int? _token = 0;
+int? _user_id;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,9 +24,12 @@ class _HomePageState extends State<HomePage> {
 
   _LoadPF() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    setState(() {
-      _token = (pref.getInt('userId') ?? 0);
-    });
+    _user_id = (pref.getInt('userId'));
+  }
+
+  _RemovePF() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    final _user_id = pref.clear();
   }
 
   @override
@@ -32,7 +37,7 @@ class _HomePageState extends State<HomePage> {
     var size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        title: Text("CREATIVE"),
+        title: Text("CREATIVE" + _user_id.toString()),
         elevation: 0,
         actions: [
           Container(
@@ -45,6 +50,7 @@ class _HomePageState extends State<HomePage> {
           ),
           IconButton(
               onPressed: (() {
+                _RemovePF();
                 SharedService.logout(context);
               }),
               icon: const Icon(

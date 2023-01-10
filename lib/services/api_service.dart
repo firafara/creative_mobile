@@ -12,7 +12,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class APIService {
   static var client = http.Client();
-  static late int UserID;
 
   static Future<bool> login(LoginRequestModel model) async {
     Map<String, String> requestHeaders = {
@@ -27,6 +26,7 @@ class APIService {
 
 //mengambil dari API laravel
     var data = jsonDecode(response.body) as Map<String, dynamic>;
+    // print(data);
     var user = data['user'] as Map<String, dynamic>;
     // print('user_id : ' + data['user'].toString());
     int userId = user['id'];
@@ -35,6 +35,7 @@ class APIService {
 
     // print(userId);
     addUserIdToSF(userId);
+    // print(await getUIDFromSF());
     addAPITokenToSF(token);
     // print('user_id_fromSF : ' + UserID.toString());
     if (response.statusCode == 200) {
@@ -51,21 +52,14 @@ class APIService {
 addUserIdToSF(userId) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.setInt('userId', userId);
-  // print(userId);
-  APIService.UserID = userId;
+}
+
+getUIDFromSF() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  return prefs.getInt('userId');
 }
 
 addAPITokenToSF(apiToken) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.setString('apiToken', apiToken);
-}
-
-getUserIdFromSF() async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  return APIService.UserID = prefs.getInt('userId')!;
-}
-
-getAPITokenFromSF() async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  return prefs.getString('apiToken');
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names, prefer_interpolation_to_compose_strings, depend_on_referenced_packages, unused_import, avoid_print
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:creative_mobile/config.dart';
@@ -22,19 +24,19 @@ class SpkDBServices {
     var SharedPreference = await _LoadPF();
     var user_id = SharedPreference['user_id'];
     var apiToken = SharedPreference['apiToken'];
-
-    // print(Config.apiURL + Config.apiSPK + '/' + id.toString());
+    // print(apiToken);
+    // print(Config.apiURL + Config.apiSPK + '/' + user_id.toString());
     var uri = Uri.http(
         Config.apiURL, Config.apiSPK + '/' + user_id.toString()); //key param
     var response = await http.get(
       uri,
       headers: {
         'Content-Type': 'application/json',
-        "Accept": 'application/json',
-        HttpHeaders.authorizationHeader: 'Bearer ' + apiToken,
+        'Accept': 'application/json',
+        'Authorization': 'Bearer ' + apiToken,
       },
     );
-    print(apiToken);
+    print(response.body);
     var results = json.decode(response.body);
     ListSpk mv = ListSpk.fromJson(results);
     return mv;

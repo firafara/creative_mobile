@@ -25,7 +25,7 @@ final List<String> faulty = [
   'Normal Condition'
 ];
 
-final List<String> serviceStatus = [
+final List<String> serviceStatusList = [
   'Waiting For Part',
   'Finished',
   'Open',
@@ -37,10 +37,10 @@ final List<String> afterService = [
   'Running',
 ];
 
-String? selectedValue1;
-String? selectedValue2;
-String? selectedValue3;
-bool light = true;
+String? faultyValue;
+String? serviceStatusValue;
+String? statusAfterServiceValue;
+bool isChecked = false;
 
 final _formKey = GlobalKey<FormState>();
 
@@ -51,54 +51,99 @@ class ServiceReportPage extends StatefulWidget {
 }
 
 class _ServiceReportPageState extends State<ServiceReportPage> {
-  TextEditingController dateInputController = TextEditingController();
-  HtmlEditorController analysis = HtmlEditorController();
-  HtmlEditorController service_note = HtmlEditorController();
-  HtmlEditorController action = HtmlEditorController();
+  //harus ditambahkan disetiap inputan
+  TextEditingController spkNumberController = TextEditingController();
+  TextEditingController serviceCategoryController = TextEditingController();
+  TextEditingController customerNameController = TextEditingController();
+  TextEditingController startDateController = TextEditingController();
+  TextEditingController endDateController = TextEditingController();
+  TextEditingController unitSiteController = TextEditingController();
+  TextEditingController provinceController = TextEditingController();
+  TextEditingController unitSnController = TextEditingController();
+  TextEditingController unitBrandController = TextEditingController();
+  TextEditingController unitModelController = TextEditingController();
+  TextEditingController unitHmController = TextEditingController();
+  TextEditingController unitKmController = TextEditingController();
+  TextEditingController complaintsController = TextEditingController();
+  TextEditingController faultyGroupController = TextEditingController();
+  TextEditingController reportCreatorController = TextEditingController();
+  TextEditingController unitStatusAfterController = TextEditingController();
+  TextEditingController unitStatusBeforeController = TextEditingController();
+  TextEditingController needSparepartsController = TextEditingController();
+  TextEditingController serviceStatusController = TextEditingController();
+
+  HtmlEditorController analysisController = HtmlEditorController();
+  HtmlEditorController serviceNoteController = HtmlEditorController();
+  HtmlEditorController actionController = HtmlEditorController();
+
   SpkDBServices svc = SpkDBServices();
+
+  String faultydropdownValue = faulty.first;
+  String serviceStatusdropdownValue = serviceStatusList.first;
+  String statusAfterdropdownValue = afterService.first;
+
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: 4,
-      child: SafeArea(
-        child: Scaffold(
-          appBar: AppBar(
-            bottom: TabBar(
-                indicator: BoxDecoration(
-                  color: Colors.blue[600],
-                  borderRadius: BorderRadius.circular(100),
+      child: Builder(builder: (context) {
+        return SafeArea(
+          child: Scaffold(
+            appBar: AppBar(
+              bottom: TabBar(
+                  indicator: BoxDecoration(
+                    color: Colors.blue[600],
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  tabs: [
+                    Tab(icon: Icon(Icons.maps_home_work_rounded)),
+                    Tab(icon: Icon(Icons.supervised_user_circle)),
+                    Tab(icon: Icon(Icons.design_services)),
+                    Tab(icon: Icon(Icons.analytics_outlined)),
+                  ]),
+              title: Text("Service Report"),
+              elevation: 0,
+              actions: [
+                ElevatedButton.icon(
+                  icon: Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/home');
+                    //pushName berguna untuk memanggil nama route yang telah kita buat di main dart
+                  },
+                  label: Text('Back'),
+                  style: ElevatedButton.styleFrom(
+                    shape: new RoundedRectangleBorder(
+                      borderRadius: new BorderRadius.circular(50),
+                    ),
+                  ),
                 ),
-                tabs: [
-                  Tab(icon: Icon(Icons.maps_home_work_rounded)),
-                  Tab(icon: Icon(Icons.supervised_user_circle)),
-                  Tab(icon: Icon(Icons.design_services)),
-                  Tab(icon: Icon(Icons.analytics_outlined)),
-                ]),
-            title: Text("Service Report"),
-            elevation: 0,
-            actions: [
-              IconButton(
+                IconButton(
                   onPressed: (() {
                     SharedService.logout(context);
                   }),
                   icon: const Icon(
                     Icons.logout,
                     color: Colors.white,
-                  ))
-            ],
-          ),
-          body: Container(
-            child: Form(
-              child: TabBarView(children: [
-                ServiceFormTab1(context),
-                ServiceFormTab2(context),
-                ServiceFormTab3(context),
-                ServiceFormTab4(context),
-              ]),
+                  ),
+                ),
+              ],
+            ),
+            body: Container(
+              child: Form(
+                child: TabBarView(children: [
+                  ServiceFormTab1(context),
+                  ServiceFormTab2(context),
+                  ServiceFormTab3(context),
+                  ServiceFormTab4(context),
+                ]),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 
@@ -112,6 +157,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             padding:
                 const EdgeInsets.only(bottom: 5, top: 10, right: 15, left: 15),
             child: TextFormField(
+              controller: spkNumberController,
               onTap: () {
                 showDialog(
                     context: context,
@@ -128,8 +174,60 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                                     'Failed load API Data with error : ' +
                                         snapshot.error.toString()));
                           } else {
+                            var listSPK = snapshot.data!.results;
                             return Material(
-                              child: Text('Hore Berhasil'),
+                              color: Colors.grey[200],
+                              child: ListView.builder(
+                                  padding: EdgeInsets.only(bottom: 24),
+                                  itemCount: listSPK.length,
+                                  itemBuilder: (context, index) {
+                                    var spk = listSPK[index];
+                                    var id = spk.spk_id;
+                                    return InkWell(
+                                      onTap: () {
+                                        spkNumberController.text =
+                                            spk.spk_number;
+                                        serviceCategoryController.text =
+                                            spk.service_category;
+                                        customerNameController.text =
+                                            spk.customer_name;
+                                        unitSiteController.text = spk.unit_site;
+                                        provinceController.text =
+                                            spk.assignment_province;
+                                        unitSnController.text = spk.unit_sn;
+                                        unitBrandController.text =
+                                            spk.unit_brand;
+                                        unitModelController.text =
+                                            spk.unit_model;
+                                        unitStatusBeforeController.text =
+                                            spk.unit_status_before_service;
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: ListView(
+                                        physics: BouncingScrollPhysics(),
+                                        padding: const EdgeInsets.all(3),
+                                        shrinkWrap: true,
+                                        children: <Widget>[
+                                          Card(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(15),
+                                            ),
+                                            clipBehavior: Clip.hardEdge,
+                                            child: ListTile(
+                                              leading: Icon(Icons.circle),
+                                              title: Text(spk.spk_number),
+                                              subtitle: Text(spk.customer_name +
+                                                  '\t-\t' +
+                                                  spk.unit_sn),
+                                              textColor: Colors.white,
+                                              tileColor: Colors.blue[600],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }),
                             );
                           }
                         },
@@ -157,6 +255,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             padding:
                 const EdgeInsets.only(bottom: 5, top: 10, right: 15, left: 15),
             child: TextFormField(
+              controller: serviceCategoryController,
               decoration: new InputDecoration(
                 hintText: "Service Category",
                 labelText: "Category",
@@ -175,7 +274,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                 border: OutlineInputBorder(
                     borderRadius: new BorderRadius.circular(5.0)),
               ),
-              controller: dateInputController,
+              controller: startDateController,
               readOnly: true,
               onTap: () async {
                 DateTime? pickedDate = await showDatePicker(
@@ -184,7 +283,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                     firstDate: DateTime(1950),
                     lastDate: DateTime(2050));
                 if (pickedDate != null) {
-                  dateInputController.text =
+                  startDateController.text =
                       DateFormat('dd MMMM yyyy').format(pickedDate);
                 }
               },
@@ -205,6 +304,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             padding:
                 const EdgeInsets.only(bottom: 5, top: 10, right: 15, left: 15),
             child: TextFormField(
+              controller: customerNameController,
               decoration: new InputDecoration(
                 hintText: "Customer",
                 labelText: "Customer",
@@ -217,6 +317,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             padding:
                 const EdgeInsets.only(bottom: 5, top: 10, right: 15, left: 15),
             child: TextFormField(
+              controller: unitSiteController,
               decoration: new InputDecoration(
                 hintText: "Unit Site",
                 labelText: "Site",
@@ -229,6 +330,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             padding:
                 const EdgeInsets.only(bottom: 5, top: 10, right: 15, left: 15),
             child: TextFormField(
+              controller: provinceController,
               decoration: new InputDecoration(
                 hintText: "Province",
                 labelText: "Province",
@@ -241,6 +343,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             padding:
                 const EdgeInsets.only(bottom: 5, top: 10, right: 15, left: 15),
             child: TextFormField(
+              controller: unitSnController,
               decoration: new InputDecoration(
                 hintText: "Unit SN",
                 labelText: "SN",
@@ -253,6 +356,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             padding:
                 const EdgeInsets.only(bottom: 5, top: 10, right: 15, left: 15),
             child: TextFormField(
+              controller: unitBrandController,
               decoration: new InputDecoration(
                 hintText: "Unit Brand",
                 labelText: "Brand",
@@ -265,6 +369,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             padding:
                 const EdgeInsets.only(bottom: 5, top: 10, right: 15, left: 15),
             child: TextFormField(
+              controller: unitModelController,
               decoration: new InputDecoration(
                 hintText: "Unit Model",
                 labelText: "Model",
@@ -277,6 +382,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             padding:
                 const EdgeInsets.only(bottom: 5, top: 10, right: 15, left: 15),
             child: TextFormField(
+              controller: unitHmController,
               decoration: new InputDecoration(
                 hintText: "Unit HM",
                 labelText: "HM",
@@ -289,6 +395,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             padding:
                 const EdgeInsets.only(bottom: 5, top: 10, right: 15, left: 15),
             child: TextFormField(
+              controller: unitKmController,
               decoration: new InputDecoration(
                 hintText: "Unit KM",
                 labelText: "KM",
@@ -301,6 +408,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             padding:
                 const EdgeInsets.only(bottom: 5, top: 10, right: 15, left: 15),
             child: TextFormField(
+              controller: unitStatusBeforeController,
               decoration: new InputDecoration(
                 hintText: "Unit Status Before Service",
                 labelText: "Status Before",
@@ -313,6 +421,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             padding:
                 const EdgeInsets.only(bottom: 15, top: 10, right: 15, left: 15),
             child: TextFormField(
+              controller: complaintsController,
               keyboardType: TextInputType.multiline,
               maxLines: 3,
               decoration: new InputDecoration(
@@ -338,6 +447,8 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             padding:
                 const EdgeInsets.only(bottom: 5, top: 10, right: 15, left: 15),
             child: DropdownButtonFormField2(
+              searchController: faultyGroupController,
+              // value: faultydropdownValue,
               decoration: InputDecoration(
                 //Add isDense true and zero Padding.
                 //Add Horizontal padding using buttonPadding and Vertical padding by increasing buttonHeight instead of add Padding here so that The whole TextField Button become clickable, and also the dropdown menu open under The whole TextField Button.
@@ -378,18 +489,38 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                   return 'Choose Faulty Group.';
                 }
               },
+              value: faultyValue,
               onChanged: (value) {
-                //Do something when changing the item if you want.
+                setState(() {
+                  faultyValue = value as String;
+                });
               },
               onSaved: (value) {
-                selectedValue1 = value.toString();
+                faultyValue = value.toString();
               },
+              // value: dropdownValue,
+              // icon: const Icon(Icons.arrow_downward),
+              // style: const TextStyle(color: Colors.deepPurple),
+              // onChanged: (String? value) {
+              //   // This is called when the user selects an item.
+              //   setState(() {
+              //     dropdownValue = value!;
+              //   });
+              // },
+              // items: faulty.map<DropdownMenuItem<String>>((String value) {
+              //   return DropdownMenuItem<String>(
+              //     value: value,
+              //     child: Text(value),
+              //   );
+              // }).toList(),
             ),
           ),
           Padding(
             padding:
                 const EdgeInsets.only(bottom: 5, top: 10, right: 15, left: 15),
             child: DropdownButtonFormField2(
+              searchController: serviceStatusController,
+              // value: serviceStatusdropdownValue,
               decoration: InputDecoration(
                 //Add isDense true and zero Padding.
                 //Add Horizontal padding using buttonPadding and Vertical padding by increasing buttonHeight instead of add Padding here so that The whole TextField Button become clickable, and also the dropdown menu open under The whole TextField Button.
@@ -414,7 +545,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
               dropdownDecoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
               ),
-              items: serviceStatus
+              items: serviceStatusList
                   .map((item) => DropdownMenuItem<String>(
                         value: item,
                         child: Text(
@@ -430,11 +561,14 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                   return 'Choose Service Status';
                 }
               },
+              value: serviceStatusValue,
               onChanged: (value) {
-                //Do something when changing the item if you want.
+                setState(() {
+                  serviceStatusValue = value as String;
+                });
               },
               onSaved: (value) {
-                selectedValue1 = value.toString();
+                serviceStatusValue = value.toString();
               },
             ),
           ),
@@ -448,7 +582,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                 border: OutlineInputBorder(
                     borderRadius: new BorderRadius.circular(5.0)),
               ),
-              controller: dateInputController,
+              controller: endDateController,
               readOnly: true,
               onTap: () async {
                 DateTime? pickedDate = await showDatePicker(
@@ -457,7 +591,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                     firstDate: DateTime(1950),
                     lastDate: DateTime(2050));
                 if (pickedDate != null) {
-                  dateInputController.text =
+                  endDateController.text =
                       DateFormat('dd MMMM yyyy').format(pickedDate);
                 }
               },
@@ -467,6 +601,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             padding:
                 const EdgeInsets.only(bottom: 5, top: 10, right: 15, left: 15),
             child: TextFormField(
+              controller: reportCreatorController,
               decoration: new InputDecoration(
                 hintText: "Creator",
                 labelText: "Report Creator",
@@ -479,6 +614,8 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             padding:
                 const EdgeInsets.only(bottom: 5, top: 10, right: 15, left: 15),
             child: DropdownButtonFormField2(
+              searchController: unitStatusAfterController,
+              // value: statusAfterdropdownValue,
               decoration: InputDecoration(
                 //Add isDense true and zero Padding.
                 //Add Horizontal padding using buttonPadding and Vertical padding by increasing buttonHeight instead of add Padding here so that The whole TextField Button become clickable, and also the dropdown menu open under The whole TextField Button.
@@ -519,27 +656,29 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                   return 'Choose Status After Service';
                 }
               },
+              value: statusAfterServiceValue,
               onChanged: (value) {
-                //Do something when changing the item if you want.
+                setState(() {
+                  statusAfterServiceValue = value as String;
+                });
               },
               onSaved: (value) {
-                selectedValue1 = value.toString();
+                statusAfterServiceValue = value.toString();
               },
             ),
           ),
           Padding(
             padding:
                 const EdgeInsets.only(bottom: 5, top: 10, right: 15, left: 10),
-            child: SwitchListTile(
-              title: Text('Need Spareparts Recommendation?'),
-              value: light,
-              activeColor: Colors.blue,
-              onChanged: (bool value) {
-                // This is called when the user toggles the switch.
+            child: CheckboxListTile(
+              title: Text("Need Spareparts Recommendation?"),
+              value: isChecked,
+              onChanged: (bool? value) {
                 setState(() {
-                  light = value;
+                  isChecked = value!;
                 });
               },
+              secondary: const Icon(Icons.lightbulb_outline),
             ),
           ),
         ],
@@ -557,7 +696,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
               padding: const EdgeInsets.only(
                   bottom: 5, top: 10, right: 15, left: 15),
               child: HtmlEditor(
-                controller: analysis, //required
+                controller: analysisController,
                 htmlEditorOptions: HtmlEditorOptions(
                   hint: "Analysis",
                 ),
@@ -576,7 +715,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
               padding: const EdgeInsets.only(
                   bottom: 5, top: 10, right: 15, left: 15),
               child: HtmlEditor(
-                controller: action, //required
+                controller: actionController, //required
                 htmlEditorOptions: HtmlEditorOptions(
                   hint: "Action",
                 ),
@@ -595,7 +734,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
               padding: const EdgeInsets.only(
                   bottom: 5, top: 10, right: 15, left: 15),
               child: HtmlEditor(
-                controller: service_note, //required
+                controller: serviceNoteController, //required
                 htmlEditorOptions: HtmlEditorOptions(
                   hint: "Service Note",
                 ),
@@ -609,7 +748,20 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                   height: 200,
                 ),
               ),
-            )
+            ),
+            Padding(
+              padding: const EdgeInsets.only(
+                  bottom: 5, top: 10, right: 15, left: 15),
+              child: ElevatedButton(
+                onPressed: () {},
+                child: const Text("Submit"),
+                style: ElevatedButton.styleFrom(
+                    primary: Colors.blue[800],
+                    textStyle: const TextStyle(
+                      color: Colors.white,
+                    )),
+              ),
+            ),
           ]),
     );
   }

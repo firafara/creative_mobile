@@ -37,7 +37,8 @@ class _HomePageState extends State<HomePage> {
     var size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        title: Text("CREATIVE" + _user_id.toString()),
+        automaticallyImplyLeading: false,
+        title: Text("CREATIVE"),
         elevation: 0,
         actions: [
           Container(

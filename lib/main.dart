@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:creative_mobile/pages/home_page.dart';
 import 'package:creative_mobile/pages/login_page..dart';
-import 'package:creative_mobile/pages/service_report.dart';
+import 'package:creative_mobile/pages/services/service_report.dart';
 import 'package:creative_mobile/pages/update_hm.dart';
 import 'package:creative_mobile/services/shared_service.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 Widget _defaultHome = const LoginPage();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  runApp(const MyApp());
   bool _result = await SharedService.isLoggedIn();
   if (_result) {
     _defaultHome = const HomePage();

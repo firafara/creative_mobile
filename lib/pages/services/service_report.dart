@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:creative_mobile/config.dart';
+import 'package:creative_mobile/constants/sr_const_list.dart';
 import 'package:creative_mobile/models/list_spk.dart';
 import 'package:creative_mobile/services/shared_service.dart';
 import 'package:creative_mobile/services/spkdb.dart';
@@ -11,31 +12,6 @@ import 'package:intl/intl.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-
-final List<String> faulty = [
-  'General',
-  'Engine',
-  'Electric',
-  'Transmission',
-  'Brake',
-  'Steering',
-  'Frame & Suspension',
-  'Cabin',
-  'Hydraulic',
-  'Normal Condition'
-];
-
-final List<String> serviceStatusList = [
-  'Waiting For Part',
-  'Finished',
-  'Open',
-];
-
-final List<String> afterService = [
-  'Breakdown',
-  'Idle',
-  'Running',
-];
 
 String? faultyValue;
 String? serviceStatusValue;
@@ -52,35 +28,39 @@ class ServiceReportPage extends StatefulWidget {
 
 class _ServiceReportPageState extends State<ServiceReportPage> {
   //harus ditambahkan disetiap inputan
-  TextEditingController spkNumberController = TextEditingController();
-  TextEditingController serviceCategoryController = TextEditingController();
-  TextEditingController customerNameController = TextEditingController();
-  TextEditingController startDateController = TextEditingController();
-  TextEditingController endDateController = TextEditingController();
-  TextEditingController unitSiteController = TextEditingController();
-  TextEditingController provinceController = TextEditingController();
-  TextEditingController unitSnController = TextEditingController();
-  TextEditingController unitBrandController = TextEditingController();
-  TextEditingController unitModelController = TextEditingController();
-  TextEditingController unitHmController = TextEditingController();
-  TextEditingController unitKmController = TextEditingController();
-  TextEditingController complaintsController = TextEditingController();
-  TextEditingController faultyGroupController = TextEditingController();
-  TextEditingController reportCreatorController = TextEditingController();
-  TextEditingController unitStatusAfterController = TextEditingController();
-  TextEditingController unitStatusBeforeController = TextEditingController();
-  TextEditingController needSparepartsController = TextEditingController();
-  TextEditingController serviceStatusController = TextEditingController();
+  final TextEditingController spkNumberController = TextEditingController();
+  final TextEditingController serviceCategoryController =
+      TextEditingController();
+  final TextEditingController customerNameController = TextEditingController();
+  final TextEditingController startDateController = TextEditingController();
+  final TextEditingController endDateController = TextEditingController();
+  final TextEditingController unitSiteController = TextEditingController();
+  final TextEditingController provinceController = TextEditingController();
+  final TextEditingController unitSnController = TextEditingController();
+  final TextEditingController unitBrandController = TextEditingController();
+  final TextEditingController unitModelController = TextEditingController();
+  final TextEditingController unitHmController = TextEditingController();
+  final TextEditingController unitKmController = TextEditingController();
+  final TextEditingController complaintsController = TextEditingController();
+  final TextEditingController faultyGroupController = TextEditingController();
+  final TextEditingController reportCreatorController = TextEditingController();
+  final TextEditingController unitStatusAfterController =
+      TextEditingController();
+  final TextEditingController unitStatusBeforeController =
+      TextEditingController();
+  final TextEditingController needSparepartsController =
+      TextEditingController();
+  final TextEditingController serviceStatusController = TextEditingController();
 
-  HtmlEditorController analysisController = HtmlEditorController();
-  HtmlEditorController serviceNoteController = HtmlEditorController();
-  HtmlEditorController actionController = HtmlEditorController();
+  final HtmlEditorController analysisController = HtmlEditorController();
+  final HtmlEditorController serviceNoteController = HtmlEditorController();
+  final HtmlEditorController actionController = HtmlEditorController();
 
   SpkDBServices svc = SpkDBServices();
 
-  String faultydropdownValue = faulty.first;
+  String faultydropdownValue = faultyList.first;
   String serviceStatusdropdownValue = serviceStatusList.first;
-  String statusAfterdropdownValue = afterService.first;
+  String statusAfterdropdownValue = afterServiceList.first;
 
   @override
   Widget build(BuildContext context) {

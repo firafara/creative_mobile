@@ -24,7 +24,6 @@ class SpkDBServices {
     var SharedPreference = await _LoadPF();
     var user_id = SharedPreference['user_id'];
     var apiToken = SharedPreference['apiToken'];
-    // print(apiToken);
     // print(Config.apiURL + Config.apiSPK + '/' + user_id.toString());
     var uri = Uri.http(
         Config.apiURL, Config.apiSPK + '/' + user_id.toString()); //key param
@@ -36,7 +35,7 @@ class SpkDBServices {
         'Authorization': 'Bearer ' + apiToken,
       },
     );
-    print(response.body);
+    // print(response.body);
     var results = json.decode(response.body);
     ListSpk mv = ListSpk.fromJson(results);
     return mv;

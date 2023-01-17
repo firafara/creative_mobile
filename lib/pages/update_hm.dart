@@ -20,20 +20,16 @@ class _HMPageState extends State<HMPage> {
           elevation: 0,
           actions: [
             ElevatedButton.icon(
-              icon: Icon(
+              icon: const Icon(
                 Icons.arrow_back,
                 color: Colors.white,
               ),
               onPressed: () {
-                Navigator.pushNamed(context, '/');
+                Navigator.pushNamed(context, '/home');
                 //pushName berguna untuk memanggil nama route yang telah kita buat di main dart
               },
-              label: Text('Back'),
-              style: ElevatedButton.styleFrom(
-                shape: new RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(50),
-                ),
-              ),
+              label: const Text('Back'),
+              style: ElevatedButton.styleFrom(),
             ),
             IconButton(
               onPressed: (() {

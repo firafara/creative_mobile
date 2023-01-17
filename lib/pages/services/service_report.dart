@@ -1,6 +1,7 @@
 // ignore_for_file: non_constant_identifier_names, prefer_interpolation_to_compose_strings, unused_import, implementation_imports, unnecessary_import, depend_on_referenced_packages, unnecessary_new, body_might_complete_normally_nullable
 
 import 'dart:convert';
+import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:creative_mobile/config.dart';
 import 'package:creative_mobile/constants/input_decoration.dart';
 import 'package:creative_mobile/constants/sr_const_list.dart';
@@ -32,8 +33,8 @@ class ServiceReportPage extends StatefulWidget {
 
 class _ServiceReportPageState extends State<ServiceReportPage> {
   GlobalKey<FlutterSummernoteState> _keyEditorAnalysis = GlobalKey();
-  // GlobalKey<FlutterSummernoteState> _keyEditorAction = GlobalKey();
-  // GlobalKey<FlutterSummernoteState> _keyEditorServiceNote = GlobalKey();
+  GlobalKey<FlutterSummernoteState> _keyEditorAction = GlobalKey();
+  GlobalKey<FlutterSummernoteState> _keyEditorServiceNote = GlobalKey();
 
   //harus ditambahkan disetiap inputan
   final TextEditingController spkNumberController = TextEditingController();
@@ -69,28 +70,23 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
   String faultydropdownValue = faultyList.first;
   String serviceStatusdropdownValue = serviceStatusList.first;
   String statusAfterdropdownValue = afterServiceList.first;
+  _RemovePF() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    final _user_id = pref.clear();
+  }
 
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
+
     return DefaultTabController(
       length: 4,
       child: Builder(builder: (context) {
         return SafeArea(
           child: Scaffold(
             appBar: AppBar(
-              bottom: TabBar(
-                  indicator: BoxDecoration(
-                    color: Colors.blue[600],
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  // ignore: prefer_const_literals_to_create_immutables
-                  tabs: [
-                    const Tab(icon: Icon(Icons.maps_home_work_rounded)),
-                    const Tab(icon: Icon(Icons.supervised_user_circle)),
-                    const Tab(icon: Icon(Icons.design_services)),
-                    const Tab(icon: Icon(Icons.analytics_outlined)),
-                  ]),
-              title: const Text("Service Report"),
+              automaticallyImplyLeading: false,
+              title: Text("Service Report"),
               elevation: 0,
               actions: [
                 ElevatedButton.icon(
@@ -117,6 +113,15 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                   ),
                 ),
               ],
+            ),
+            bottomNavigationBar: ConvexAppBar(
+              items: [
+                TabItem(icon: Icons.map_outlined, title: 'SPK'),
+                TabItem(icon: Icons.people_alt, title: 'Customer'),
+                TabItem(icon: Icons.message, title: 'Faulty'),
+                TabItem(icon: Icons.analytics_outlined, title: 'Action'),
+              ],
+              onTap: (int i) => print('click index=$i'),
             ),
             body: Form(
               key: _formKey,
@@ -190,31 +195,39 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                                               spk.unit_status_before_service;
                                           Navigator.of(context).pop();
                                         },
-                                        child: ListView(
-                                          physics:
-                                              const BouncingScrollPhysics(),
-                                          padding: const EdgeInsets.all(3),
-                                          shrinkWrap: true,
-                                          children: <Widget>[
-                                            Card(
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(15),
+                                        child: Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 10),
+                                          child: ListView(
+                                            physics:
+                                                const BouncingScrollPhysics(),
+                                            padding: const EdgeInsets.all(3),
+                                            shrinkWrap: true,
+                                            children: <Widget>[
+                                              Card(
+                                                shape: RoundedRectangleBorder(
+                                                  side: BorderSide(
+                                                    color: Colors.lightBlue,
+                                                  ),
+                                                  borderRadius:
+                                                      const BorderRadius.all(
+                                                          Radius.circular(12)),
+                                                ),
+                                                clipBehavior: Clip.hardEdge,
+                                                child: ListTile(
+                                                  leading:
+                                                      const Icon(Icons.circle),
+                                                  title: Text(spk.spk_number),
+                                                  subtitle: Text(
+                                                      spk.customer_name +
+                                                          '\t-\t' +
+                                                          spk.unit_sn),
+                                                  textColor: Colors.white,
+                                                  tileColor: Colors.blue[600],
+                                                ),
                                               ),
-                                              clipBehavior: Clip.hardEdge,
-                                              child: ListTile(
-                                                leading:
-                                                    const Icon(Icons.circle),
-                                                title: Text(spk.spk_number),
-                                                subtitle: Text(
-                                                    spk.customer_name +
-                                                        '\t-\t' +
-                                                        spk.unit_sn),
-                                                textColor: Colors.white,
-                                                tileColor: Colors.blue[600],
-                                              ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       );
                                     }),
@@ -334,7 +347,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
           ),
           Padding(
             padding:
-                const EdgeInsets.only(bottom: 15, top: 10, right: 15, left: 15),
+                const EdgeInsets.only(bottom: 30, top: 10, right: 15, left: 15),
             child: TextFormField(
                 controller: complaintsController,
                 keyboardType: TextInputType.multiline,
@@ -589,14 +602,49 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             Padding(
               padding: inputFieldPadding,
               child: FlutterSummernote(
+                  showBottomToolbar: false,
                   hint: "Analysis...",
                   key: _keyEditorAnalysis,
                   height: 300,
                   customToolbar: """[
                     ['style', ['bold', 'italic', 'underline', 'clear']],
                     ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
                     ['para', ['ul', 'ol', 'paragraph']],
-                    ['table', ['table']],
+                    ['height', ['height']]
+                  ]"""),
+            ),
+            Padding(
+              padding: inputFieldPadding,
+              child: FlutterSummernote(
+                  showBottomToolbar: false,
+                  hint: "Action...",
+                  key: _keyEditorAction,
+                  height: 300,
+                  customToolbar: """[
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']]
+                  ]"""),
+            ),
+            Padding(
+              padding: inputFieldPadding,
+              child: FlutterSummernote(
+                  showBottomToolbar: false,
+                  hint: "Service Note...",
+                  key: _keyEditorServiceNote,
+                  height: 300,
+                  customToolbar: """[
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['height', ['height']]
                   ]"""),
             ),
             // Padding(
@@ -639,21 +687,24 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             // ),
             Padding(
               padding: inputFieldPadding,
-              child: Center(
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                    final _etEditor =
-                        await _keyEditorAnalysis.currentState?.getText();
-                  },
-                  icon: const Icon(
-                      Icons.save_as_outlined), //icon data for elevated button
-                  label: const Text("SUBMIT"), //label text
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          Colors.green, //elevated btton background color
-                      minimumSize: const Size.fromHeight(50),
-                      textStyle: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold)),
+              child: Container(
+                margin: EdgeInsets.only(left: 5, right: 5, bottom: 25, top: 10),
+                child: Center(
+                  child: ElevatedButton.icon(
+                    onPressed: () async {
+                      final _etEditor =
+                          await _keyEditorAnalysis.currentState?.getText();
+                    },
+                    icon: const Icon(
+                        Icons.save_as_outlined), //icon data for elevated button
+                    label: const Text("SUBMIT"), //label text
+                    style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            Colors.green, //elevated btton background color
+                        minimumSize: const Size.fromHeight(50),
+                        textStyle: const TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
+                  ),
                 ),
               ),
             ),

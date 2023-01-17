@@ -15,6 +15,7 @@ import 'package:intl/intl.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_summernote/flutter_summernote.dart';
 
 String? faultyValue;
 String? serviceStatusValue;
@@ -30,6 +31,10 @@ class ServiceReportPage extends StatefulWidget {
 }
 
 class _ServiceReportPageState extends State<ServiceReportPage> {
+  GlobalKey<FlutterSummernoteState> _keyEditorAnalysis = GlobalKey();
+  // GlobalKey<FlutterSummernoteState> _keyEditorAction = GlobalKey();
+  // GlobalKey<FlutterSummernoteState> _keyEditorServiceNote = GlobalKey();
+
   //harus ditambahkan disetiap inputan
   final TextEditingController spkNumberController = TextEditingController();
   final TextEditingController serviceCategoryController =
@@ -55,9 +60,9 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
       TextEditingController();
   final TextEditingController serviceStatusController = TextEditingController();
 
-  final HtmlEditorController analysisController = HtmlEditorController();
-  final HtmlEditorController serviceNoteController = HtmlEditorController();
-  final HtmlEditorController actionController = HtmlEditorController();
+  // final HtmlEditorController analysisController = HtmlEditorController();
+  // final HtmlEditorController serviceNoteController = HtmlEditorController();
+  // final HtmlEditorController actionController = HtmlEditorController();
 
   SpkDBServices svc = SpkDBServices();
 
@@ -583,66 +588,63 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
           children: [
             Padding(
               padding: inputFieldPadding,
-              child: HtmlEditor(
-                controller: analysisController, //required
-                htmlEditorOptions: const HtmlEditorOptions(
-                  hint: "Analysis",
-                ),
-                htmlToolbarOptions:
-                    const HtmlToolbarOptions(defaultToolbarButtons: [
-                  FontButtons(),
-                  ListButtons(),
-                  FontSettingButtons(),
-                  ParagraphButtons(),
-                ]),
-                otherOptions: const OtherOptions(
-                  height: 200,
-                ),
-              ),
+              child: FlutterSummernote(
+                  hint: "Analysis...",
+                  key: _keyEditorAnalysis,
+                  height: 300,
+                  customToolbar: """[
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['font', ['strikethrough', 'superscript', 'subscript']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['table', ['table']],
+                  ]"""),
             ),
-            Padding(
-              padding: inputFieldPadding,
-              child: HtmlEditor(
-                controller: actionController, //required
-                htmlEditorOptions: const HtmlEditorOptions(
-                  hint: "Action",
-                ),
-                htmlToolbarOptions:
-                    const HtmlToolbarOptions(defaultToolbarButtons: [
-                  FontButtons(),
-                  ListButtons(),
-                  FontSettingButtons(),
-                  ParagraphButtons(),
-                ]),
-                otherOptions: const OtherOptions(
-                  height: 200,
-                ),
-              ),
-            ),
-            Padding(
-              padding: inputFieldPadding,
-              child: HtmlEditor(
-                controller: serviceNoteController, //required
-                htmlEditorOptions: const HtmlEditorOptions(
-                  hint: "Service Note",
-                ),
-                htmlToolbarOptions:
-                    const HtmlToolbarOptions(defaultToolbarButtons: [
-                  FontButtons(),
-                  ListButtons(),
-                  FontSettingButtons(),
-                  ParagraphButtons(),
-                ]),
-                otherOptions: const OtherOptions(
-                  height: 200,
-                ),
-              ),
-            ),
+            // Padding(
+            //   padding: inputFieldPadding,
+            //   child: HtmlEditor(
+            //     controller: actionController, //required
+            //     htmlEditorOptions: const HtmlEditorOptions(
+            //       hint: "Action",
+            //     ),
+            //     htmlToolbarOptions:
+            //         const HtmlToolbarOptions(defaultToolbarButtons: [
+            //       FontButtons(),
+            //       ListButtons(),
+            //       FontSettingButtons(),
+            //       ParagraphButtons(),
+            //     ]),
+            //     otherOptions: const OtherOptions(
+            //       height: 200,
+            //     ),
+            //   ),
+            // ),
+            // Padding(
+            //   padding: inputFieldPadding,
+            //   child: HtmlEditor(
+            //     controller: serviceNoteController, //required
+            //     htmlEditorOptions: const HtmlEditorOptions(
+            //       hint: "Service Note",
+            //     ),
+            //     htmlToolbarOptions:
+            //         const HtmlToolbarOptions(defaultToolbarButtons: [
+            //       FontButtons(),
+            //       ListButtons(),
+            //       FontSettingButtons(),
+            //       ParagraphButtons(),
+            //     ]),
+            //     otherOptions: const OtherOptions(
+            //       height: 200,
+            //     ),
+            //   ),
+            // ),
             Padding(
               padding: inputFieldPadding,
               child: Center(
                 child: ElevatedButton.icon(
-                  onPressed: () {},
+                  onPressed: () async {
+                    final _etEditor =
+                        await _keyEditorAnalysis.currentState?.getText();
+                  },
                   icon: const Icon(
                       Icons.save_as_outlined), //icon data for elevated button
                   label: const Text("SUBMIT"), //label text

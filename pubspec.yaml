@@ -34,7 +34,7 @@ dependencies:
   api_cache_manager: ^1.0.2
   snippet_coder_utils: ^1.0.9
   polygon_clipper: ^1.0.2
-  intl: 0.17.0
+  intl: 0.18.0
   flutter_holo_date_picker: 1.0.3
   dropdown_button2: ^1.9.2
   html_editor_enhanced: ^2.5.0
@@ -43,6 +43,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   shared_preferences: ^2.0.15
   fluttericon: ^2.0.0
+  flutter_summernote: ^1.0.0
 
 dev_dependencies:
   flutter_test:

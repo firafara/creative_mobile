@@ -1,4 +1,4 @@
-// ignore_for_file: non_constant_identifier_names, prefer_interpolation_to_compose_strings, unused_import, implementation_imports, unnecessary_import, depend_on_referenced_packages, unnecessary_new, body_might_complete_normally_nullable
+// ignore_for_file: non_constant_identifier_names, prefer_interpolation_to_compose_strings, unused_import, implementation_imports, unnecessary_import, depend_on_referenced_packages, unnecessary_new, body_might_complete_normally_nullable, prefer_const_constructors
 
 import 'dart:convert';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
@@ -32,11 +32,12 @@ class ServiceReportPage extends StatefulWidget {
 }
 
 class _ServiceReportPageState extends State<ServiceReportPage> {
-  GlobalKey<FlutterSummernoteState> _keyEditorAnalysis = GlobalKey();
-  GlobalKey<FlutterSummernoteState> _keyEditorAction = GlobalKey();
-  GlobalKey<FlutterSummernoteState> _keyEditorServiceNote = GlobalKey();
+  final GlobalKey<FlutterSummernoteState> _keyEditorAnalysis = GlobalKey();
+  final GlobalKey<FlutterSummernoteState> _keyEditorAction = GlobalKey();
+  final GlobalKey<FlutterSummernoteState> _keyEditorServiceNote = GlobalKey();
 
   //harus ditambahkan disetiap inputan
+  final TextEditingController spkID = TextEditingController();
   final TextEditingController spkNumberController = TextEditingController();
   final TextEditingController serviceCategoryController =
       TextEditingController();
@@ -72,70 +73,80 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
   String statusAfterdropdownValue = afterServiceList.first;
   _RemovePF() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    final _user_id = pref.clear();
+    pref.clear();
   }
 
+  _tes() async {
+    final value = await _keyEditorAnalysis.currentState?.getText();
+    final _value = _keyEditorAnalysis.currentState?.text = value!;
+  }
+
+  int currentIndex = 0;
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
-
-    return DefaultTabController(
-      length: 4,
-      child: Builder(builder: (context) {
-        return SafeArea(
-          child: Scaffold(
-            appBar: AppBar(
-              automaticallyImplyLeading: false,
-              title: Text("Service Report"),
-              elevation: 0,
-              actions: [
-                ElevatedButton.icon(
-                  icon: const Icon(
-                    Icons.arrow_back,
-                    color: Colors.white,
-                  ),
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/home');
-                    //pushName berguna untuk memanggil nama route yang telah kita buat di main dart
-                  },
-                  label: const Text('Back'),
-                  style: ElevatedButton.styleFrom(
-                    shape: const RoundedRectangleBorder(),
-                  ),
+    List<Widget> widgets = [
+      ServiceFormTab1(context),
+      ServiceFormTab2(context),
+      ServiceFormTab3(context),
+      ServiceFormTab4(context)
+    ];
+    return Builder(builder: (context) {
+      return SafeArea(
+        child: Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            title: Text("Service Report"),
+            elevation: 0,
+            actions: [
+              ElevatedButton.icon(
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
                 ),
-                IconButton(
-                  onPressed: (() {
-                    SharedService.logout(context);
-                  }),
-                  icon: const Icon(
-                    Icons.logout,
-                    color: Colors.white,
-                  ),
+                onPressed: () {
+                  Navigator.pushNamed(context, '/home');
+                  //pushName berguna untuk memanggil nama route yang telah kita buat di main dart
+                },
+                label: const Text('Back'),
+                style: ElevatedButton.styleFrom(
+                  shape: const RoundedRectangleBorder(),
                 ),
-              ],
-            ),
-            bottomNavigationBar: ConvexAppBar(
-              items: [
-                TabItem(icon: Icons.map_outlined, title: 'SPK'),
-                TabItem(icon: Icons.people_alt, title: 'Customer'),
-                TabItem(icon: Icons.message, title: 'Faulty'),
-                TabItem(icon: Icons.analytics_outlined, title: 'Action'),
-              ],
-              onTap: (int i) => print('click index=$i'),
-            ),
-            body: Form(
-              key: _formKey,
-              child: TabBarView(children: [
-                ServiceFormTab1(context),
-                ServiceFormTab2(context),
-                ServiceFormTab3(context),
-                ServiceFormTab4(context),
-              ]),
-            ),
+              ),
+              IconButton(
+                onPressed: (() {
+                  _RemovePF();
+                  SharedService.logout(context);
+                }),
+                icon: const Icon(
+                  Icons.logout,
+                  color: Colors.white,
+                ),
+              ),
+            ],
           ),
-        );
-      }),
-    );
+          bottomNavigationBar: ConvexAppBar(
+            // ignore: prefer_const_literals_to_create_immutables
+            items: [
+              const TabItem(icon: Icons.map_outlined, title: 'SPK'),
+              TabItem(icon: Icons.people_alt, title: 'Customer'),
+              TabItem(icon: Icons.message, title: 'Faulty'),
+              TabItem(icon: Icons.analytics_outlined, title: 'Action'),
+            ],
+            onTap: (int i) {
+              setState(() {
+                currentIndex = i;
+              });
+              _tes();
+            },
+          ),
+          body: Form(
+            key: _formKey,
+            child: widgets[currentIndex],
+          ),
+        ),
+      );
+    });
   }
 
   Widget ServiceFormTab1(BuildContext context) {
@@ -173,9 +184,10 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                                     itemCount: listSPK.length,
                                     itemBuilder: (context, index) {
                                       var spk = listSPK[index];
-                                      var id = spk.spk_id;
+                                      int? id = spk.spk_id;
                                       return InkWell(
                                         onTap: () {
+                                          spkID.text = id.toString();
                                           spkNumberController.text =
                                               spk.spk_number;
                                           serviceCategoryController.text =

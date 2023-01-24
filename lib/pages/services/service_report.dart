@@ -128,7 +128,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
           bottomNavigationBar: ConvexAppBar(
             // ignore: prefer_const_literals_to_create_immutables
             items: [
-              const TabItem(icon: Icons.map_outlined, title: 'SPK'),
+              TabItem(icon: Icons.map_outlined, title: 'SPK'),
               TabItem(icon: Icons.people_alt, title: 'Customer'),
               TabItem(icon: Icons.message, title: 'Faulty'),
               TabItem(icon: Icons.analytics_outlined, title: 'Action'),

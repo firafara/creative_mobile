@@ -1,4 +1,4 @@
-// ignore_for_file: non_constant_identifier_names, prefer_interpolation_to_compose_strings, unused_import, implementation_imports, unnecessary_import, depend_on_referenced_packages, unnecessary_new, body_might_complete_normally_nullable, prefer_const_constructors
+// ignore_for_file: non_constant_identifier_names, prefer_interpolation_to_compose_strings, unused_import, implementation_imports, unnecessary_import, depend_on_referenced_packages, unnecessary_new, body_might_complete_normally_nullable
 
 import 'dart:convert';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
@@ -17,27 +17,33 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_summernote/flutter_summernote.dart';
+import 'package:zefyrka/zefyrka.dart';
 
 String? faultyValue;
 String? serviceStatusValue;
 String? statusAfterServiceValue;
 bool isChecked = false;
 
-final _formKey = GlobalKey<FormState>();
-
 class ServiceReportPage extends StatefulWidget {
-  const ServiceReportPage({super.key});
+  // const ServiceReportPage({super.key});
+  const ServiceReportPage({Key? key, this.onSubmit}) : super(key: key);
+  final ValueChanged<String>? onSubmit;
   @override
   State<ServiceReportPage> createState() => _ServiceReportPageState();
 }
 
 class _ServiceReportPageState extends State<ServiceReportPage> {
-  final GlobalKey<FlutterSummernoteState> _keyEditorAnalysis = GlobalKey();
-  final GlobalKey<FlutterSummernoteState> _keyEditorAction = GlobalKey();
-  final GlobalKey<FlutterSummernoteState> _keyEditorServiceNote = GlobalKey();
+  @override
+  void dispose() {
+    startDateController.dispose();
+    super.dispose();
+  }
+
+  ZefyrController _analysisController = ZefyrController();
+  ZefyrController _actionController = ZefyrController();
+  ZefyrController _serviceNoteController = ZefyrController();
 
   //harus ditambahkan disetiap inputan
-  final TextEditingController spkID = TextEditingController();
   final TextEditingController spkNumberController = TextEditingController();
   final TextEditingController serviceCategoryController =
       TextEditingController();
@@ -68,20 +74,41 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
 
   SpkDBServices svc = SpkDBServices();
 
+  GlobalKey<FlutterSummernoteState> _keyEditorAnalysis = GlobalKey();
+  GlobalKey<FlutterSummernoteState> _keyEditorAction = GlobalKey();
+  GlobalKey<FlutterSummernoteState> _keyEditorServiceNote = GlobalKey();
+  final _formKey = GlobalKey<FormState>();
+
   String faultydropdownValue = faultyList.first;
   String serviceStatusdropdownValue = serviceStatusList.first;
   String statusAfterdropdownValue = afterServiceList.first;
-  _RemovePF() async {
+  _removePF() async {
     SharedPreferences pref = await SharedPreferences.getInstance();
-    pref.clear();
-  }
-
-  _tes() async {
-    final value = await _keyEditorAnalysis.currentState?.getText();
-    final _value = _keyEditorAnalysis.currentState?.text = value!;
+    final _user_id = pref.clear();
   }
 
   int currentIndex = 0;
+
+  String? get _errorText {
+    // at any time, we can get the text from _actionController.value.text
+    final text = startDateController.value.text;
+    // Note: you can do your own custom validation here
+    // Move this logic this outside the widget for more testable code
+    if (text.isEmpty) {
+      return 'Can\'t be empty';
+    }
+    // return null if the text is valid
+    return null;
+  }
+
+  void _submit() {
+    // if there is no error text
+    if (_errorText == null) {
+      // notify the parent widget via the onSubmit callback
+      widget.onSubmit!(startDateController.value.text);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -91,31 +118,25 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
       ServiceFormTab3(context),
       ServiceFormTab4(context)
     ];
+
     return Builder(builder: (context) {
       return SafeArea(
         child: Scaffold(
           appBar: AppBar(
-            automaticallyImplyLeading: false,
+            centerTitle: true,
+            automaticallyImplyLeading: true,
             title: Text("Service Report"),
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back_sharp, color: Colors.white),
+              onPressed: () {
+                Navigator.pushNamed(context, '/home');
+              },
+            ),
             elevation: 0,
             actions: [
-              ElevatedButton.icon(
-                icon: const Icon(
-                  Icons.arrow_back,
-                  color: Colors.white,
-                ),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/home');
-                  //pushName berguna untuk memanggil nama route yang telah kita buat di main dart
-                },
-                label: const Text('Back'),
-                style: ElevatedButton.styleFrom(
-                  shape: const RoundedRectangleBorder(),
-                ),
-              ),
               IconButton(
                 onPressed: (() {
-                  _RemovePF();
+                  _removePF();
                   SharedService.logout(context);
                 }),
                 icon: const Icon(
@@ -126,20 +147,17 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             ],
           ),
           bottomNavigationBar: ConvexAppBar(
-            // ignore: prefer_const_literals_to_create_immutables
-            items: [
-              TabItem(icon: Icons.map_outlined, title: 'SPK'),
-              TabItem(icon: Icons.people_alt, title: 'Customer'),
-              TabItem(icon: Icons.message, title: 'Faulty'),
-              TabItem(icon: Icons.analytics_outlined, title: 'Action'),
-            ],
-            onTap: (int i) {
-              setState(() {
-                currentIndex = i;
-              });
-              _tes();
-            },
-          ),
+              items: [
+                TabItem(icon: Icons.map_outlined, title: 'SPK'),
+                TabItem(icon: Icons.people_alt, title: 'Customer'),
+                TabItem(icon: Icons.message, title: 'Faulty'),
+                TabItem(icon: Icons.analytics_outlined, title: 'Action'),
+              ],
+              onTap: (int i) {
+                setState(() {
+                  currentIndex = i;
+                });
+              }),
           body: Form(
             key: _formKey,
             child: widgets[currentIndex],
@@ -184,10 +202,9 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                                     itemCount: listSPK.length,
                                     itemBuilder: (context, index) {
                                       var spk = listSPK[index];
-                                      int? id = spk.spk_id;
+                                      var id = spk.spk_id;
                                       return InkWell(
                                         onTap: () {
-                                          spkID.text = id.toString();
                                           spkNumberController.text =
                                               spk.spk_number;
                                           serviceCategoryController.text =
@@ -209,33 +226,38 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                                         },
                                         child: Padding(
                                           padding:
-                                              const EdgeInsets.only(top: 10),
+                                              const EdgeInsets.only(top: 15),
                                           child: ListView(
                                             physics:
                                                 const BouncingScrollPhysics(),
-                                            padding: const EdgeInsets.all(3),
+                                            padding: const EdgeInsets.all(2),
                                             shrinkWrap: true,
                                             children: <Widget>[
                                               Card(
                                                 shape: RoundedRectangleBorder(
-                                                  side: BorderSide(
-                                                    color: Colors.lightBlue,
-                                                  ),
                                                   borderRadius:
                                                       const BorderRadius.all(
                                                           Radius.circular(12)),
                                                 ),
                                                 clipBehavior: Clip.hardEdge,
                                                 child: ListTile(
-                                                  leading:
-                                                      const Icon(Icons.circle),
+                                                  leading: SizedBox(
+                                                    // color: backColor,
+                                                    width: 60,
+                                                    height: 60,
+                                                    child: Image.asset(
+                                                        'assets/icons/spk1.PNG',
+                                                        fit: BoxFit.fill),
+                                                  ),
                                                   title: Text(spk.spk_number),
                                                   subtitle: Text(
                                                       spk.customer_name +
                                                           '\t-\t' +
                                                           spk.unit_sn),
+                                                  trailing:
+                                                      Icon(Icons.chevron_right),
                                                   textColor: Colors.white,
-                                                  tileColor: Colors.blue[600],
+                                                  tileColor: Color(0xff5271ff),
                                                 ),
                                               ),
                                             ],
@@ -270,7 +292,16 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
           Padding(
             padding: inputFieldPadding,
             child: TextFormField(
-              decoration: inputDecoration("Working Start Date", "Start Date"),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Working Start Date is not choosen!';
+                }
+                return null;
+              },
+              decoration: inputDecoration(
+                'End Date',
+                'Working End Date',
+              ),
               controller: startDateController,
               readOnly: true,
               onTap: () async {
@@ -337,6 +368,12 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
           Padding(
             padding: inputFieldPadding,
             child: TextFormField(
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Unit HM cannot be empty!';
+                }
+                return null;
+              },
               controller: unitHmController,
               decoration: inputDecoration('Unit HM', 'Unit HM'),
               keyboardType: TextInputType.number,
@@ -353,6 +390,12 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
           Padding(
             padding: inputFieldPadding,
             child: TextFormField(
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Status Before Service cannot be empty!';
+                  }
+                  return null;
+                },
                 controller: unitStatusBeforeController,
                 decoration: inputDecoration(
                     'Unit Status Before Service', 'Status Before')),
@@ -361,10 +404,17 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             padding:
                 const EdgeInsets.only(bottom: 30, top: 10, right: 15, left: 15),
             child: TextFormField(
-                controller: complaintsController,
-                keyboardType: TextInputType.multiline,
-                maxLines: 3,
-                decoration: inputDecoration('Complaints', 'Complaints')),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Complaints cannot be empty!';
+                }
+                return null;
+              },
+              controller: complaintsController,
+              keyboardType: TextInputType.multiline,
+              maxLines: 3,
+              decoration: inputDecoration('Complaints', 'Complaints'),
+            ),
           ),
         ],
       ),
@@ -418,9 +468,10 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                       ))
                   .toList(),
               validator: (value) {
-                if (value == null) {
-                  return 'Choose Faulty Group.';
+                if (value == null || value.isEmpty) {
+                  return 'Faulty Group is not choosen!';
                 }
+                return null;
               },
               value: faultyValue,
               onChanged: (value) {
@@ -489,10 +540,12 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                       ))
                   .toList(),
               validator: (value) {
-                if (value == null) {
-                  return 'Choose Service Status';
+                if (value == null || value.isEmpty) {
+                  return 'Service Status is not choosen!';
                 }
+                return null;
               },
+
               value: serviceStatusValue,
               onChanged: (value) {
                 setState(() {
@@ -507,6 +560,12 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
           Padding(
             padding: inputFieldPadding,
             child: TextFormField(
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Working End Date is not choosen!';
+                }
+                return null;
+              },
               decoration: inputDecoration('End Date', 'Working End Date'),
               controller: endDateController,
               readOnly: true,
@@ -571,9 +630,10 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                       ))
                   .toList(),
               validator: (value) {
-                if (value == null) {
-                  return 'Choose Status After Service';
+                if (value == null || value.isEmpty) {
+                  return 'Status After Service is not choosen!';
                 }
+                return null;
               },
               value: statusAfterServiceValue,
               onChanged: (value) {
@@ -608,119 +668,158 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
   Widget ServiceFormTab4(BuildContext context) {
     return SingleChildScrollView(
       child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: inputFieldPadding,
-              child: FlutterSummernote(
-                  showBottomToolbar: false,
-                  hint: "Analysis...",
-                  key: _keyEditorAnalysis,
-                  height: 300,
-                  customToolbar: """[
-                    ['style', ['bold', 'italic', 'underline', 'clear']],
-                    ['font', ['strikethrough', 'superscript', 'subscript']],
-                    ['fontsize', ['fontsize']],
-                    ['color', ['color']],
-                    ['para', ['ul', 'ol', 'paragraph']],
-                    ['height', ['height']]
-                  ]"""),
-            ),
-            Padding(
-              padding: inputFieldPadding,
-              child: FlutterSummernote(
-                  showBottomToolbar: false,
-                  hint: "Action...",
-                  key: _keyEditorAction,
-                  height: 300,
-                  customToolbar: """[
-                    ['style', ['bold', 'italic', 'underline', 'clear']],
-                    ['font', ['strikethrough', 'superscript', 'subscript']],
-                    ['fontsize', ['fontsize']],
-                    ['color', ['color']],
-                    ['para', ['ul', 'ol', 'paragraph']],
-                    ['height', ['height']]
-                  ]"""),
-            ),
-            Padding(
-              padding: inputFieldPadding,
-              child: FlutterSummernote(
-                  showBottomToolbar: false,
-                  hint: "Service Note...",
-                  key: _keyEditorServiceNote,
-                  height: 300,
-                  customToolbar: """[
-                    ['style', ['bold', 'italic', 'underline', 'clear']],
-                    ['font', ['strikethrough', 'superscript', 'subscript']],
-                    ['fontsize', ['fontsize']],
-                    ['color', ['color']],
-                    ['para', ['ul', 'ol', 'paragraph']],
-                    ['height', ['height']]
-                  ]"""),
-            ),
-            // Padding(
-            //   padding: inputFieldPadding,
-            //   child: HtmlEditor(
-            //     controller: actionController, //required
-            //     htmlEditorOptions: const HtmlEditorOptions(
-            //       hint: "Action",
-            //     ),
-            //     htmlToolbarOptions:
-            //         const HtmlToolbarOptions(defaultToolbarButtons: [
-            //       FontButtons(),
-            //       ListButtons(),
-            //       FontSettingButtons(),
-            //       ParagraphButtons(),
-            //     ]),
-            //     otherOptions: const OtherOptions(
-            //       height: 200,
-            //     ),
-            //   ),
-            // ),
-            // Padding(
-            //   padding: inputFieldPadding,
-            //   child: HtmlEditor(
-            //     controller: serviceNoteController, //required
-            //     htmlEditorOptions: const HtmlEditorOptions(
-            //       hint: "Service Note",
-            //     ),
-            //     htmlToolbarOptions:
-            //         const HtmlToolbarOptions(defaultToolbarButtons: [
-            //       FontButtons(),
-            //       ListButtons(),
-            //       FontSettingButtons(),
-            //       ParagraphButtons(),
-            //     ]),
-            //     otherOptions: const OtherOptions(
-            //       height: 200,
-            //     ),
-            //   ),
-            // ),
-            Padding(
-              padding: inputFieldPadding,
-              child: Container(
-                margin: EdgeInsets.only(left: 5, right: 5, bottom: 25, top: 10),
-                child: Center(
-                  child: ElevatedButton.icon(
-                    onPressed: () async {
-                      final _etEditor =
-                          await _keyEditorAnalysis.currentState?.getText();
-                    },
-                    icon: const Icon(
-                        Icons.save_as_outlined), //icon data for elevated button
-                    label: const Text("SUBMIT"), //label text
-                    style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            Colors.green, //elevated btton background color
-                        minimumSize: const Size.fromHeight(50),
-                        textStyle: const TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
+        mainAxisAlignment: MainAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(
+            height: 20,
+          ),
+          Column(
+            children: <Widget>[
+              Text('Analysis',
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+              ZefyrToolbar.basic(
+                controller: _analysisController,
+                hideLink: true,
+                hideQuote: true,
+                hideCodeBlock: true,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  margin: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.blueAccent)),
+                  child: ZefyrEditor(
+                    controller: _analysisController,
+                    minHeight: 100,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(
+            height: 30,
+          ),
+          Column(
+            children: <Widget>[
+              Text('Action',
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.left),
+              ZefyrToolbar.basic(
+                controller: _actionController,
+                hideLink: true,
+                hideQuote: true,
+                hideCodeBlock: true,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  margin: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.blueAccent)),
+                  child: ZefyrEditor(
+                    controller: _actionController,
+                    minHeight: 100,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(
+            height: 30,
+          ),
+          Column(
+            children: <Widget>[
+              Text('Service Note',
+                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.left),
+              ZefyrToolbar.basic(
+                controller: _serviceNoteController,
+                hideLink: true,
+                hideQuote: true,
+                hideCodeBlock: true,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  margin: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(8.0),
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.blueAccent)),
+                  child: ZefyrEditor(
+                    controller: _serviceNoteController,
+                    minHeight: 100,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: inputFieldPadding,
+            child: Container(
+              margin: EdgeInsets.only(left: 5, right: 5, bottom: 25, top: 10),
+              child: Center(
+                child: ElevatedButton.icon(
+                  onPressed: reportCreatorController.value.text.isNotEmpty
+                      ? _submit
+                      : null,
+                  icon: const Icon(
+                      Icons.save_as_outlined), //icon data for elevated button
+                  label: const Text("SUBMIT"), //label text
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        Colors.green, //elevated btton background color
+                    minimumSize: const Size.fromHeight(50),
+                    textStyle: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
             ),
-          ]),
+          ),
+          // Padding(
+          //   padding: inputFieldPadding,
+          //   child: HtmlEditor(
+          //     controller: actionController, //required
+          //     htmlEditorOptions: const HtmlEditorOptions(
+          //       hint: "Action",
+          //     ),
+          //     htmlToolbarOptions:
+          //         const HtmlToolbarOptions(defaultToolbarButtons: [
+          //       FontButtons(),
+          //       ListButtons(),
+          //       FontSettingButtons(),
+          //       ParagraphButtons(),
+          //     ]),
+          //     otherOptions: const OtherOptions(
+          //       height: 200,
+          //     ),
+          //   ),
+          // ),
+          // Padding(
+          //   padding: inputFieldPadding,
+          //   child: HtmlEditor(
+          //     controller: serviceNoteController, //required
+          //     htmlEditorOptions: const HtmlEditorOptions(
+          //       hint: "Service Note",
+          //     ),
+          //     htmlToolbarOptions:
+          //         const HtmlToolbarOptions(defaultToolbarButtons: [
+          //       FontButtons(),
+          //       ListButtons(),
+          //       FontSettingButtons(),
+          //       ParagraphButtons(),
+          //     ]),
+          //     otherOptions: const OtherOptions(
+          //       height: 200,
+          //     ),
+          //   ),
+          // ),
+        ],
+      ),
     );
   }
 }

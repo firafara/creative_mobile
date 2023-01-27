@@ -28,10 +28,12 @@ class APIService {
     var data = jsonDecode(response.body) as Map<String, dynamic>;
     var user = data['user'] as Map<String, dynamic>;
     int userId = user['id'];
+    var username = user['user_name'];
+
     var auth = data['auth'] as Map<String, dynamic>;
     var token = auth['token'] as String;
 
-    addUserIdToSF(userId);
+    addUserIdToSF(userId, username);
     print(await getUIDFromSF());
     addAPITokenToSF(token);
     // print('user_id_fromSF : ' + UserID.toString());
@@ -46,9 +48,10 @@ class APIService {
   }
 }
 
-addUserIdToSF(userId) async {
+addUserIdToSF(userId, username) async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   prefs.setInt('userId', userId);
+  prefs.setString('user_name', username);
 }
 
 getUIDFromSF() async {

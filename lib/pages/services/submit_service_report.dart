@@ -17,6 +17,7 @@ class SubmitServiceReportWidget extends StatefulWidget {
 
 class _SubmitServiceReportWidgetState extends State<SubmitServiceReportWidget> {
   var f = GlobalKey<FormState>();
+  var spkNumber = TextEditingController();
   var spkId = TextEditingController();
   var category = TextEditingController();
   var servicestartDate = TextEditingController();
@@ -39,6 +40,7 @@ class _SubmitServiceReportWidgetState extends State<SubmitServiceReportWidget> {
   submitServiceReport(data) async {
     var uri = Uri.http("192.168.10.132:8000", "/api/movie");
     var isiSpkId = spkId.text;
+    var isiSpkNumber = spkNumber.text;
     var isiCategory = category.text;
     var isiStartDate = servicestartDate.text;
     var isiCustomerId = customerId.text;
@@ -58,6 +60,7 @@ class _SubmitServiceReportWidgetState extends State<SubmitServiceReportWidget> {
 
     var response = await http.post(uri, body: {
       "spk_id": isiSpkId,
+      "request_number": isiSpkNumber,
       "service_category": isiCategory,
       "service_start_date": isiStartDate,
       "customer_id": isiCustomerId,

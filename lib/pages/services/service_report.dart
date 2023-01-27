@@ -6,6 +6,7 @@ import 'package:creative_mobile/config.dart';
 import 'package:creative_mobile/constants/input_decoration.dart';
 import 'package:creative_mobile/constants/sr_const_list.dart';
 import 'package:creative_mobile/models/list_spk.dart';
+import 'package:creative_mobile/pages/services/submit_service_report.dart';
 import 'package:creative_mobile/services/shared_service.dart';
 import 'package:creative_mobile/services/spkdb.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +20,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_summernote/flutter_summernote.dart';
 import 'package:zefyrka/zefyrka.dart';
 
+// import 'package:zefyr/validation.dart';
 String? faultyValue;
 String? serviceStatusValue;
 String? statusAfterServiceValue;
@@ -33,6 +35,7 @@ class ServiceReportPage extends StatefulWidget {
 }
 
 class _ServiceReportPageState extends State<ServiceReportPage> {
+  SubmitServiceReportWidget svc2 = SubmitServiceReportWidget();
   @override
   void dispose() {
     startDateController.dispose();
@@ -44,6 +47,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
   ZefyrController _serviceNoteController = ZefyrController();
 
   //harus ditambahkan disetiap inputan
+  final TextEditingController spkIdController = TextEditingController();
   final TextEditingController spkNumberController = TextEditingController();
   final TextEditingController serviceCategoryController =
       TextEditingController();
@@ -87,6 +91,23 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
     final _user_id = pref.clear();
   }
 
+  _getUserName() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    return pref.getString('user_name');
+  }
+
+  late String _username;
+  @override
+  void initState() {
+    super.initState();
+    _getUserName().then((username) {
+      setState(() {
+        _username = username;
+        reportCreatorController.text = _username;
+      });
+    });
+  }
+
   int currentIndex = 0;
 
   String? get _errorText {
@@ -105,7 +126,8 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
     // if there is no error text
     if (_errorText == null) {
       // notify the parent widget via the onSubmit callback
-      widget.onSubmit!(startDateController.value.text);
+      widget.onSubmit!(reportCreatorController.value.text);
+      // svc2.;
     }
   }
 
@@ -205,6 +227,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                                       var id = spk.spk_id;
                                       return InkWell(
                                         onTap: () {
+                                          spkIdController.text = id.toString();
                                           spkNumberController.text =
                                               spk.spk_number;
                                           serviceCategoryController.text =
@@ -674,88 +697,102 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
           const SizedBox(
             height: 20,
           ),
-          Column(
-            children: <Widget>[
-              Text('Analysis',
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
-              ZefyrToolbar.basic(
-                controller: _analysisController,
-                hideLink: true,
-                hideQuote: true,
-                hideCodeBlock: true,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  margin: const EdgeInsets.all(8.0),
+          SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                Text('Analysis',
+                    style:
+                        TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
+                ZefyrToolbar.basic(
+                  controller: _analysisController,
+                  hideLink: true,
+                  hideQuote: true,
+                  hideCodeBlock: true,
+                ),
+                Padding(
                   padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Colors.blueAccent)),
-                  child: ZefyrEditor(
-                    controller: _analysisController,
-                    minHeight: 100,
+                  child: Container(
+                    height: 200,
+                    width: double.infinity,
+                    margin: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                        border: Border.all(color: Colors.blueAccent)),
+                    child: ZefyrEditor(
+                      controller: _analysisController,
+                      minHeight: 100,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(
             height: 30,
           ),
-          Column(
-            children: <Widget>[
-              Text('Action',
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.left),
-              ZefyrToolbar.basic(
-                controller: _actionController,
-                hideLink: true,
-                hideQuote: true,
-                hideCodeBlock: true,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  margin: const EdgeInsets.all(8.0),
+          SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                Text('Action',
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.left),
+                ZefyrToolbar.basic(
+                  controller: _actionController,
+                  hideLink: true,
+                  hideQuote: true,
+                  hideCodeBlock: true,
+                ),
+                Padding(
                   padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Colors.blueAccent)),
-                  child: ZefyrEditor(
-                    controller: _actionController,
-                    minHeight: 100,
+                  child: Container(
+                    height: 200,
+                    width: double.infinity,
+                    margin: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                        border: Border.all(color: Colors.blueAccent)),
+                    child: ZefyrEditor(
+                      controller: _actionController,
+                      minHeight: 100,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(
             height: 30,
           ),
-          Column(
-            children: <Widget>[
-              Text('Service Note',
-                  style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.left),
-              ZefyrToolbar.basic(
-                controller: _serviceNoteController,
-                hideLink: true,
-                hideQuote: true,
-                hideCodeBlock: true,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  margin: const EdgeInsets.all(8.0),
+          SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: Column(
+              children: <Widget>[
+                Text('Service Note',
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.left),
+                ZefyrToolbar.basic(
+                  controller: _serviceNoteController,
+                  hideLink: true,
+                  hideQuote: true,
+                  hideCodeBlock: true,
+                ),
+                Padding(
                   padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                      border: Border.all(color: Colors.blueAccent)),
-                  child: ZefyrEditor(
-                    controller: _serviceNoteController,
-                    minHeight: 100,
+                  child: Container(
+                    height: 200,
+                    width: double.infinity,
+                    margin: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                        border: Border.all(color: Colors.blueAccent)),
+                    child: ZefyrEditor(
+                      controller: _serviceNoteController,
+                      minHeight: 100,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           Padding(
             padding: inputFieldPadding,

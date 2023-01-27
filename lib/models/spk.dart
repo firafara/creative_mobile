@@ -1,6 +1,7 @@
 class Spk {
   late String service_category;
   late String customer_name;
+  late String customer_id;
   late String unit_site;
   late String assignment_province;
   late String spk_number;
@@ -14,6 +15,7 @@ class Spk {
   Spk.fromJson(Map<String, dynamic> json) {
     service_category = json['service_category'] ?? "";
     customer_name = json['customer_name'] ?? "";
+    customer_id = json['customer_id'] ?? "";
     unit_site = json['unit_site'] ?? "";
     assignment_province = json['assignment_province'] ?? "";
     spk_number = json['spk_number'] ?? "";

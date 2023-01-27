@@ -10,5 +10,21 @@ inputDecoration(hintText, labelText, {suffixIcon}) {
       suffixIcon: suffixIcon);
 }
 
+inputHintText(item) {
+  return Text(
+    item,
+    style: const TextStyle(
+      fontSize: 14,
+    ),
+  );
+}
+
 final inputFieldPadding =
     EdgeInsets.only(bottom: 5, top: 10, right: 15, left: 15);
+
+final dropDownDecoration = BoxDecoration(
+  borderRadius: BorderRadius.circular(10),
+);
+
+final inputBorder =
+    OutlineInputBorder(borderRadius: new BorderRadius.circular(5.0));

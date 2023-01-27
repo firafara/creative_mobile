@@ -25,8 +25,11 @@ class SpkDBServices {
     var user_id = SharedPreference['user_id'];
     var apiToken = SharedPreference['apiToken'];
     // print(Config.apiURL + Config.apiSPK + '/' + user_id.toString());
-    var uri = Uri.http(
-        Config.apiURL, Config.apiSPK + '/' + user_id.toString()); //key param
+    // var uri = Uri.http(
+    //     Config.apiURL, Config.apiSPK + '/' + user_id.toString()); //key param
+    var uri = Uri.http('192.168.4.56:8000',
+        Config.apiSPK + '/' + user_id.toString()); //key param
+
     var response = await http.get(
       uri,
       headers: {

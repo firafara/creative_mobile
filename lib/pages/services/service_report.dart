@@ -73,13 +73,13 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
   final reportCreatorController = TextEditingController();
   final unitStatusAfterController = TextEditingController();
   final unitStatusBeforeController = TextEditingController();
-  final needSparepartsController = TextEditingController();
   final serviceStatusController = TextEditingController();
   String faultydropdownValue = faultyList.first;
   String serviceStatusdropdownValue = serviceStatusList.first;
   String statusAfterdropdownValue = afterServiceList.first;
   int currentIndex = 0;
   late String _username;
+  late int? _uid;
 
   @override
   void initState() {
@@ -88,6 +88,12 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
       setState(() {
         _username = username;
         reportCreatorController.text = _username;
+      });
+    });
+    cf.getUserID().then((uid) {
+      setState(() {
+        _uid = uid;
+        userIDController.text = _uid.toString();
       });
     });
   }
@@ -102,27 +108,28 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
 
   void _submit() {
     Map<String, dynamic> inputValue = {
-      "spk_id": spkIdController,
-      "request_number": requestNumberController,
-      "user_id": userIDController,
-      "service_start_date": startDateController,
-      "service_category": serviceCategoryController,
-      "service_complaints": complaintsController,
-      "service_analysis": analysisController,
-      "service_action": actionController,
+      "spk_id": spkIdController.text,
+      "request_number": requestNumberController.text,
+      "user_id": userIDController.text,
+      "service_start_date": startDateController.text,
+      "service_category": serviceCategoryController.text,
+      "service_complaints": complaintsController.text,
+      "service_analysis": analysisController.document.toPlainText(),
+      "service_action": actionController.document.toPlainText(),
       "service_status": serviceStatusdropdownValue,
-      "service_notes": serviceNoteController,
-      "service_end_date": endDateController,
-      "faulty_group": faultyGroupController,
-      "customer_id": customerIDController,
-      "unit_sn": unitSnController,
-      "unit_status_before_service": unitStatusBeforeController,
-      "unit_hm": unitHmController,
-      "unit_km": unitKmController,
-      "unit_status_after_service": unitStatusAfterController,
-      "need_parts_recommendation": needSparepartsController,
+      "service_notes": serviceNoteController.document.toPlainText(),
+      "service_end_date": endDateController.text,
+      "faulty_group": faultydropdownValue,
+      "customer_id": customerIDController.text,
+      "unit_sn": unitSnController.text,
+      "unit_status_before_service": unitStatusBeforeController.text,
+      "unit_hm": unitHmController.text,
+      "unit_km": unitKmController.text,
+      "unit_status_after_service": statusAfterdropdownValue,
+      "need_parts_recommendation": (isChecked == true) ? 1 : 0,
     };
     if (_errorText == null) {
+      print('input value : ' + inputValue.toString());
       widget.onSubmit!(reportCreatorController.value.text);
       ssr.submitServiceReport(inputValue);
     }
@@ -226,10 +233,14 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                                           spkIdController.text = id.toString();
                                           spkNumberController.text =
                                               spk.spk_number;
+                                          requestNumberController.text =
+                                              spk.spk_number;
                                           serviceCategoryController.text =
                                               spk.service_category;
                                           customerNameController.text =
                                               spk.customer_name;
+                                          customerIDController.text =
+                                              spk.customer_id.toString();
                                           unitSiteController.text =
                                               spk.unit_site;
                                           provinceController.text =
@@ -452,14 +463,9 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
               searchController: faultyGroupController,
               // value: faultydropdownValue,
               decoration: InputDecoration(
-                //Add isDense true and zero Padding.
-                //Add Horizontal padding using buttonPadding and Vertical padding by increasing buttonHeight instead of add Padding here so that The whole TextField Button become clickable, and also the dropdown menu open under The whole TextField Button.
                 isDense: true,
                 contentPadding: EdgeInsets.zero,
-                border: OutlineInputBorder(
-                    borderRadius: new BorderRadius.circular(5.0)),
-                //Add more decoration as you want here
-                //Add label If you want but add hint outside the decoration to be aligned in the button perfectly.
+                border: inputBorder,
               ),
               isExpanded: false,
               hint: const Text(
@@ -472,18 +478,11 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
               ),
               iconSize: 30,
               buttonHeight: 60,
-              dropdownDecoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              dropdownDecoration: dropDownDecoration,
               items: faultyList
                   .map((item) => DropdownMenuItem<String>(
                         value: item,
-                        child: Text(
-                          item,
-                          style: const TextStyle(
-                            fontSize: 14,
-                          ),
-                        ),
+                        child: inputHintText(item),
                       ))
                   .toList(),
               validator: (value) {
@@ -501,21 +500,6 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
               onSaved: (value) {
                 faultyValue = value.toString();
               },
-              // value: dropdownValue,
-              // icon: const Icon(Icons.arrow_downward),
-              // style: const TextStyle(color: Colors.deepPurple),
-              // onChanged: (String? value) {
-              //   // This is called when the user selects an item.
-              //   setState(() {
-              //     dropdownValue = value!;
-              //   });
-              // },
-              // items: faulty.map<DropdownMenuItem<String>>((String value) {
-              //   return DropdownMenuItem<String>(
-              //     value: value,
-              //     child: Text(value),
-              //   );
-              // }).toList(),
             ),
           ),
           Padding(
@@ -524,38 +508,23 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
               searchController: serviceStatusController,
               // value: serviceStatusdropdownValue,
               decoration: InputDecoration(
-                //Add isDense true and zero Padding.
-                //Add Horizontal padding using buttonPadding and Vertical padding by increasing buttonHeight instead of add Padding here so that The whole TextField Button become clickable, and also the dropdown menu open under The whole TextField Button.
                 isDense: true,
                 contentPadding: EdgeInsets.zero,
-                border: OutlineInputBorder(
-                    borderRadius: new BorderRadius.circular(5.0)),
-                //Add more decoration as you want here
-                //Add label If you want but add hint outside the decoration to be aligned in the button perfectly.
+                border: inputBorder,
               ),
               isExpanded: false,
-              hint: const Text(
-                'Service Status',
-                style: TextStyle(fontSize: 16),
-              ),
+              hint: inputHintText("Service Status"),
               icon: const Icon(
                 Icons.arrow_drop_down,
                 color: Colors.black45,
               ),
               iconSize: 30,
               buttonHeight: 60,
-              dropdownDecoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              dropdownDecoration: dropDownDecoration,
               items: serviceStatusList
                   .map((item) => DropdownMenuItem<String>(
                         value: item,
-                        child: Text(
-                          item,
-                          style: const TextStyle(
-                            fontSize: 14,
-                          ),
-                        ),
+                        child: inputHintText(item),
                       ))
                   .toList(),
               validator: (value) {
@@ -614,38 +583,23 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
               searchController: unitStatusAfterController,
               // value: statusAfterdropdownValue,
               decoration: InputDecoration(
-                //Add isDense true and zero Padding.
-                //Add Horizontal padding using buttonPadding and Vertical padding by increasing buttonHeight instead of add Padding here so that The whole TextField Button become clickable, and also the dropdown menu open under The whole TextField Button.
                 isDense: true,
                 contentPadding: EdgeInsets.zero,
-                border: OutlineInputBorder(
-                    borderRadius: new BorderRadius.circular(5.0)),
-                //Add more decoration as you want here
-                //Add label If you want but add hint outside the decoration to be aligned in the button perfectly.
+                border: inputBorder,
               ),
               isExpanded: false,
-              hint: const Text(
-                'Unit Status After Service',
-                style: TextStyle(fontSize: 16),
-              ),
+              hint: inputHintText('Unit Status After Service'),
               icon: const Icon(
                 Icons.arrow_drop_down,
                 color: Colors.black45,
               ),
               iconSize: 30,
               buttonHeight: 60,
-              dropdownDecoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-              ),
+              dropdownDecoration: dropDownDecoration,
               items: afterServiceList
                   .map((item) => DropdownMenuItem<String>(
                         value: item,
-                        child: Text(
-                          item,
-                          style: const TextStyle(
-                            fontSize: 14,
-                          ),
-                        ),
+                        child: inputHintText(item),
                       ))
                   .toList(),
               validator: (value) {
@@ -813,44 +767,6 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
               ),
             ),
           ),
-          // Padding(
-          //   padding: inputFieldPadding,
-          //   child: HtmlEditor(
-          //     controller: actionController, //required
-          //     htmlEditorOptions: const HtmlEditorOptions(
-          //       hint: "Action",
-          //     ),
-          //     htmlToolbarOptions:
-          //         const HtmlToolbarOptions(defaultToolbarButtons: [
-          //       FontButtons(),
-          //       ListButtons(),
-          //       FontSettingButtons(),
-          //       ParagraphButtons(),
-          //     ]),
-          //     otherOptions: const OtherOptions(
-          //       height: 200,
-          //     ),
-          //   ),
-          // ),
-          // Padding(
-          //   padding: inputFieldPadding,
-          //   child: HtmlEditor(
-          //     controller: serviceNoteController, //required
-          //     htmlEditorOptions: const HtmlEditorOptions(
-          //       hint: "Service Note",
-          //     ),
-          //     htmlToolbarOptions:
-          //         const HtmlToolbarOptions(defaultToolbarButtons: [
-          //       FontButtons(),
-          //       ListButtons(),
-          //       FontSettingButtons(),
-          //       ParagraphButtons(),
-          //     ]),
-          //     otherOptions: const OtherOptions(
-          //       height: 200,
-          //     ),
-          //   ),
-          // ),
         ],
       ),
     );

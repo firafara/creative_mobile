@@ -10,4 +10,9 @@ class ConstantFunction {
     SharedPreferences pref = await SharedPreferences.getInstance();
     return pref.getString('user_name');
   }
+
+  getUserID() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    return pref.getInt('userId');
+  }
 }

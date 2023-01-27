@@ -1,10 +1,12 @@
 import 'dart:convert';
 
+import 'package:creative_mobile/config.dart';
 import 'package:http/http.dart' as http;
 
 class SubmitServiceReport {
   submitServiceReport(data) async {
-    var uri = Uri.http("192.168.10.132:8000", "/api/movie");
+    // var uri = Uri.http(Config.apiURL, Config.apiStoreSR);
+    var uri = Uri.http("192.168.4.56:8000", Config.apiStoreSR);
 
     var response = await http.post(uri, body: {
       "spk_id": data['spk_id'],

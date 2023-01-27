@@ -1,8 +1,9 @@
-// ignore_for_file: non_constant_identifier_names, prefer_interpolation_to_compose_strings, unused_import, implementation_imports, unnecessary_import, depend_on_referenced_packages, unnecessary_new, body_might_complete_normally_nullable
+// ignore_for_file: non_constant_identifier_names, prefer_interpolation_to_compose_strings, unused_import, implementation_imports, unnecessary_import, depend_on_referenced_packages, unnecessary_new, body_might_complete_normally_nullable, prefer_const_constructors
 
 import 'dart:convert';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:creative_mobile/config.dart';
+import 'package:creative_mobile/constants/constant_functions.dart';
 import 'package:creative_mobile/constants/input_decoration.dart';
 import 'package:creative_mobile/constants/sr_const_list.dart';
 import 'package:creative_mobile/models/list_spk.dart';
@@ -35,72 +36,55 @@ class ServiceReportPage extends StatefulWidget {
 }
 
 class _ServiceReportPageState extends State<ServiceReportPage> {
-  SubmitServiceReportWidget svc2 = SubmitServiceReportWidget();
+  SubmitServiceReport svc2 = SubmitServiceReport();
   @override
   void dispose() {
     startDateController.dispose();
     super.dispose();
   }
 
-  ZefyrController _analysisController = ZefyrController();
-  ZefyrController _actionController = ZefyrController();
-  ZefyrController _serviceNoteController = ZefyrController();
-
-  //harus ditambahkan disetiap inputan
-  final TextEditingController spkIdController = TextEditingController();
-  final TextEditingController spkNumberController = TextEditingController();
-  final TextEditingController serviceCategoryController =
-      TextEditingController();
-  final TextEditingController customerNameController = TextEditingController();
-  final TextEditingController startDateController = TextEditingController();
-  final TextEditingController endDateController = TextEditingController();
-  final TextEditingController unitSiteController = TextEditingController();
-  final TextEditingController provinceController = TextEditingController();
-  final TextEditingController unitSnController = TextEditingController();
-  final TextEditingController unitBrandController = TextEditingController();
-  final TextEditingController unitModelController = TextEditingController();
-  final TextEditingController unitHmController = TextEditingController();
-  final TextEditingController unitKmController = TextEditingController();
-  final TextEditingController complaintsController = TextEditingController();
-  final TextEditingController faultyGroupController = TextEditingController();
-  final TextEditingController reportCreatorController = TextEditingController();
-  final TextEditingController unitStatusAfterController =
-      TextEditingController();
-  final TextEditingController unitStatusBeforeController =
-      TextEditingController();
-  final TextEditingController needSparepartsController =
-      TextEditingController();
-  final TextEditingController serviceStatusController = TextEditingController();
-
-  // final HtmlEditorController analysisController = HtmlEditorController();
-  // final HtmlEditorController serviceNoteController = HtmlEditorController();
-  // final HtmlEditorController actionController = HtmlEditorController();
-
   SpkDBServices svc = SpkDBServices();
+  SubmitServiceReport ssr = SubmitServiceReport();
+  ConstantFunction cf = new ConstantFunction();
 
-  GlobalKey<FlutterSummernoteState> _keyEditorAnalysis = GlobalKey();
-  GlobalKey<FlutterSummernoteState> _keyEditorAction = GlobalKey();
-  GlobalKey<FlutterSummernoteState> _keyEditorServiceNote = GlobalKey();
   final _formKey = GlobalKey<FormState>();
-
+  //harus ditambahkan disetiap inputan
+  final analysisController = ZefyrController();
+  final actionController = ZefyrController();
+  final serviceNoteController = ZefyrController();
+  final spkIdController = TextEditingController();
+  final requestNumberController = TextEditingController();
+  final userIDController = TextEditingController();
+  final spkNumberController = TextEditingController();
+  final serviceCategoryController = TextEditingController();
+  final customerIDController = TextEditingController();
+  final customerNameController = TextEditingController();
+  final startDateController = TextEditingController();
+  final endDateController = TextEditingController();
+  final unitSiteController = TextEditingController();
+  final provinceController = TextEditingController();
+  final unitSnController = TextEditingController();
+  final unitBrandController = TextEditingController();
+  final unitModelController = TextEditingController();
+  final unitHmController = TextEditingController();
+  final unitKmController = TextEditingController();
+  final complaintsController = TextEditingController();
+  final faultyGroupController = TextEditingController();
+  final reportCreatorController = TextEditingController();
+  final unitStatusAfterController = TextEditingController();
+  final unitStatusBeforeController = TextEditingController();
+  final needSparepartsController = TextEditingController();
+  final serviceStatusController = TextEditingController();
   String faultydropdownValue = faultyList.first;
   String serviceStatusdropdownValue = serviceStatusList.first;
   String statusAfterdropdownValue = afterServiceList.first;
-  _removePF() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    final _user_id = pref.clear();
-  }
-
-  _getUserName() async {
-    SharedPreferences pref = await SharedPreferences.getInstance();
-    return pref.getString('user_name');
-  }
-
+  int currentIndex = 0;
   late String _username;
+
   @override
   void initState() {
     super.initState();
-    _getUserName().then((username) {
+    cf.getUserName().then((username) {
       setState(() {
         _username = username;
         reportCreatorController.text = _username;
@@ -108,32 +92,44 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
     });
   }
 
-  int currentIndex = 0;
-
   String? get _errorText {
-    // at any time, we can get the text from _actionController.value.text
     final text = startDateController.value.text;
-    // Note: you can do your own custom validation here
-    // Move this logic this outside the widget for more testable code
     if (text.isEmpty) {
       return 'Can\'t be empty';
     }
-    // return null if the text is valid
     return null;
   }
 
   void _submit() {
-    // if there is no error text
+    Map<String, dynamic> inputValue = {
+      "spk_id": spkIdController,
+      "request_number": requestNumberController,
+      "user_id": userIDController,
+      "service_start_date": startDateController,
+      "service_category": serviceCategoryController,
+      "service_complaints": complaintsController,
+      "service_analysis": analysisController,
+      "service_action": actionController,
+      "service_status": serviceStatusdropdownValue,
+      "service_notes": serviceNoteController,
+      "service_end_date": endDateController,
+      "faulty_group": faultyGroupController,
+      "customer_id": customerIDController,
+      "unit_sn": unitSnController,
+      "unit_status_before_service": unitStatusBeforeController,
+      "unit_hm": unitHmController,
+      "unit_km": unitKmController,
+      "unit_status_after_service": unitStatusAfterController,
+      "need_parts_recommendation": needSparepartsController,
+    };
     if (_errorText == null) {
-      // notify the parent widget via the onSubmit callback
       widget.onSubmit!(reportCreatorController.value.text);
-      // svc2.;
+      ssr.submitServiceReport(inputValue);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    var size = MediaQuery.of(context).size;
     List<Widget> widgets = [
       ServiceFormTab1(context),
       ServiceFormTab2(context),
@@ -158,7 +154,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             actions: [
               IconButton(
                 onPressed: (() {
-                  _removePF();
+                  cf.removePF();
                   SharedService.logout(context);
                 }),
                 icon: const Icon(
@@ -704,7 +700,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                     style:
                         TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
                 ZefyrToolbar.basic(
-                  controller: _analysisController,
+                  controller: analysisController,
                   hideLink: true,
                   hideQuote: true,
                   hideCodeBlock: true,
@@ -719,7 +715,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                     decoration: BoxDecoration(
                         border: Border.all(color: Colors.blueAccent)),
                     child: ZefyrEditor(
-                      controller: _analysisController,
+                      controller: analysisController,
                       minHeight: 100,
                     ),
                   ),
@@ -737,7 +733,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                     style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.left),
                 ZefyrToolbar.basic(
-                  controller: _actionController,
+                  controller: actionController,
                   hideLink: true,
                   hideQuote: true,
                   hideCodeBlock: true,
@@ -752,7 +748,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                     decoration: BoxDecoration(
                         border: Border.all(color: Colors.blueAccent)),
                     child: ZefyrEditor(
-                      controller: _actionController,
+                      controller: actionController,
                       minHeight: 100,
                     ),
                   ),
@@ -771,7 +767,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                     style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.left),
                 ZefyrToolbar.basic(
-                  controller: _serviceNoteController,
+                  controller: serviceNoteController,
                   hideLink: true,
                   hideQuote: true,
                   hideCodeBlock: true,
@@ -786,7 +782,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                     decoration: BoxDecoration(
                         border: Border.all(color: Colors.blueAccent)),
                     child: ZefyrEditor(
-                      controller: _serviceNoteController,
+                      controller: serviceNoteController,
                       minHeight: 100,
                     ),
                   ),

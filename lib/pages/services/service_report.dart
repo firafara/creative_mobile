@@ -21,7 +21,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_summernote/flutter_summernote.dart';
 import 'package:zefyrka/zefyrka.dart';
 
-// import 'package:zefyr/validation.dart';
 String? faultyValue;
 String? serviceStatusValue;
 String? statusAfterServiceValue;
@@ -37,17 +36,19 @@ class ServiceReportPage extends StatefulWidget {
 
 class _ServiceReportPageState extends State<ServiceReportPage> {
   SubmitServiceReport svc2 = SubmitServiceReport();
-  @override
-  void dispose() {
-    startDateController.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   startDateController.dispose();
+  //   super.dispose();
+  // }
 
   SpkDBServices svc = SpkDBServices();
   SubmitServiceReport ssr = SubmitServiceReport();
   ConstantFunction cf = new ConstantFunction();
 
   final _formKey = GlobalKey<FormState>();
+  // final _formKey2 = GlobalKey<FormState>();
+
   //harus ditambahkan disetiap inputan
   final analysisController = ZefyrController();
   final actionController = ZefyrController();
@@ -98,14 +99,6 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
     });
   }
 
-  String? get _errorText {
-    final text = startDateController.value.text;
-    if (text.isEmpty) {
-      return 'Can\'t be empty';
-    }
-    return null;
-  }
-
   void _submit() {
     Map<String, dynamic> inputValue = {
       "spk_id": spkIdController.text,
@@ -128,11 +121,12 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
       "unit_status_after_service": statusAfterdropdownValue,
       "need_parts_recommendation": (isChecked == true) ? 1 : 0,
     };
-    if (_errorText == null) {
-      print('input value : ' + inputValue.toString());
-      widget.onSubmit!(reportCreatorController.value.text);
-      ssr.submitServiceReport(inputValue);
-    }
+    // if (_errorText == null) {
+    print('input value : ' + inputValue.toString());
+    widget.onSubmit!(reportCreatorController.value.text);
+    ssr.submitServiceReport(inputValue);
+    // }
+    print(actionController.document.toPlainText());
   }
 
   @override
@@ -329,8 +323,8 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                 return null;
               },
               decoration: inputDecoration(
-                'End Date',
-                'Working End Date',
+                'Start Date',
+                'Working Start Date',
               ),
               controller: startDateController,
               readOnly: true,
@@ -550,7 +544,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             child: TextFormField(
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Working End Date is not choosen!';
+                  return 'Working End Date cannot be empty!';
                 }
                 return null;
               },
@@ -633,6 +627,41 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
               secondary: const Icon(Icons.lightbulb_outline),
             ),
           ),
+          Padding(
+            padding: inputFieldPadding,
+            child: Container(
+              margin: EdgeInsets.only(left: 5, right: 5, bottom: 25, top: 10),
+              child: Center(
+                child: ElevatedButton.icon(
+                  // onPressed: () {
+                  //   if (_formKey2 != null) {
+                  //     print(3);
+                  //     if (_formKey2.currentState != null &&
+                  //         _formKey2.currentState!.validate()) {
+                  //       // Perform the action here, for example, saving the data
+                  //       print(2);
+                  //     }
+                  //   }
+                  // },
+                  onPressed: () {
+                    if (_formKey.currentState!.validate()) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Processing Data')),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.save_as_outlined),
+                  label: const Text("SUBMIT"),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,
+                    minimumSize: const Size.fromHeight(50),
+                    textStyle: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -680,41 +709,52 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
           const SizedBox(
             height: 30,
           ),
-          SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                Text('Action',
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.left),
-                ZefyrToolbar.basic(
-                  controller: actionController,
-                  hideLink: true,
-                  hideQuote: true,
-                  hideCodeBlock: true,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    height: 200,
-                    width: double.infinity,
-                    margin: const EdgeInsets.all(8.0),
-                    padding: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                        border: Border.all(color: Colors.blueAccent)),
-                    child: ZefyrEditor(
+          FormField<NotusDocument>(
+            // key: _formKey2,
+            validator: (value) {
+              if (value!.toPlainText().isEmpty) {
+                return 'Action cannot be empty';
+              }
+              return null;
+            },
+            builder: (state) {
+              return SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    Text('Action',
+                        style: TextStyle(
+                            fontSize: 17, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.left),
+                    ZefyrToolbar.basic(
                       controller: actionController,
-                      minHeight: 100,
+                      hideLink: true,
+                      hideQuote: true,
+                      hideCodeBlock: true,
                     ),
-                  ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        height: 200,
+                        width: double.infinity,
+                        margin: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.blueAccent)),
+                        child: ZefyrEditor(
+                          controller: actionController,
+                          minHeight: 100,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
           const SizedBox(
             height: 30,
           ),
           SingleChildScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
             child: Column(
               children: <Widget>[
                 Text('Service Note',
@@ -744,29 +784,41 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
               ],
             ),
           ),
-          Padding(
-            padding: inputFieldPadding,
-            child: Container(
-              margin: EdgeInsets.only(left: 5, right: 5, bottom: 25, top: 10),
-              child: Center(
-                child: ElevatedButton.icon(
-                  onPressed: reportCreatorController.value.text.isNotEmpty
-                      ? _submit
-                      : null,
-                  icon: const Icon(
-                      Icons.save_as_outlined), //icon data for elevated button
-                  label: const Text("SUBMIT"), //label text
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        Colors.green, //elevated btton background color
-                    minimumSize: const Size.fromHeight(50),
-                    textStyle: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ),
+
+          const SizedBox(
+            height: 30,
           ),
+          // SingleChildScrollView(
+          //   physics: AlwaysScrollableScrollPhysics(),
+          //   child: Column(
+          //     children: <Widget>[
+          //       Text('Service Note',
+          //           style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+          //           textAlign: TextAlign.left),
+          //       ZefyrToolbar.basic(
+          //         controller: serviceNoteController,
+          //         hideLink: true,
+          //         hideQuote: true,
+          //         hideCodeBlock: true,
+          //       ),
+          //       Padding(
+          //         padding: const EdgeInsets.all(8.0),
+          //         child: Container(
+          //           height: 200,
+          //           width: double.infinity,
+          //           margin: const EdgeInsets.all(8.0),
+          //           padding: const EdgeInsets.all(8.0),
+          //           decoration: BoxDecoration(
+          //               border: Border.all(color: Colors.blueAccent)),
+          //           child: ZefyrEditor(
+          //             controller: serviceNoteController,
+          //             minHeight: 100,
+          //           ),
+          //         ),
+          //       ),
+          //     ],
+          //   ),
+          // ),
         ],
       ),
     );

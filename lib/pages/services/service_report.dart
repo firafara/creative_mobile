@@ -27,27 +27,27 @@ String? statusAfterServiceValue;
 bool isChecked = false;
 
 class ServiceReportPage extends StatefulWidget {
-  // const ServiceReportPage({super.key});
-  const ServiceReportPage({Key? key, this.onSubmit}) : super(key: key);
-  final ValueChanged<String>? onSubmit;
+  // const ServiceReportPage({Key? key, this.onSubmit}) : super(key: key);
+  const ServiceReportPage({Key? key}) : super(key: key);
+
+  // final ValueChanged<String>? onSubmit;
   @override
   State<ServiceReportPage> createState() => _ServiceReportPageState();
 }
 
 class _ServiceReportPageState extends State<ServiceReportPage> {
   SubmitServiceReport svc2 = SubmitServiceReport();
-  // @override
-  // void dispose() {
-  //   startDateController.dispose();
-  //   super.dispose();
-  // }
 
   SpkDBServices svc = SpkDBServices();
   SubmitServiceReport ssr = SubmitServiceReport();
   ConstantFunction cf = new ConstantFunction();
 
-  final _formKey = GlobalKey<FormState>();
-  // final _formKey2 = GlobalKey<FormState>();
+  // final _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey _startDateKey = GlobalKey();
+  GlobalKey _endDateKey = GlobalKey();
+  GlobalKey _actionKey = GlobalKey();
+  GlobalKey _reportKey = GlobalKey();
 
   //harus ditambahkan disetiap inputan
   final analysisController = ZefyrController();
@@ -115,6 +115,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
       "faulty_group": faultydropdownValue,
       "customer_id": customerIDController.text,
       "unit_sn": unitSnController.text,
+      "report_creator": reportCreatorController.text,
       "unit_status_before_service": unitStatusBeforeController.text,
       "unit_hm": unitHmController.text,
       "unit_km": unitKmController.text,
@@ -122,11 +123,11 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
       "need_parts_recommendation": (isChecked == true) ? 1 : 0,
     };
     // if (_errorText == null) {
-    print('input value : ' + inputValue.toString());
-    widget.onSubmit!(reportCreatorController.value.text);
+    print('input value : ' + reportCreatorController.value.text);
+    // widget.onSubmit!(reportCreatorController.value.text);
     ssr.submitServiceReport(inputValue);
     // }
-    print(actionController.document.toPlainText());
+    // print(actionController.document.toPlainText());
   }
 
   @override
@@ -154,12 +155,18 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             elevation: 0,
             actions: [
               IconButton(
-                onPressed: (() {
-                  cf.removePF();
-                  SharedService.logout(context);
-                }),
+                onPressed: () {
+                  //  if (formKey1.currentState.validate() && formKey2.currentState.validate()) {
+                  if (_formKey.currentState!.validate()) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Processing Data')),
+                    );
+                    _submit();
+                    setState(() {});
+                  } else {}
+                },
                 icon: const Icon(
-                  Icons.logout,
+                  Icons.save_alt,
                   color: Colors.white,
                 ),
               ),
@@ -175,6 +182,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
               onTap: (int i) {
                 setState(() {
                   currentIndex = i;
+                  // _formKey.currentState?.reset();
                 });
               }),
           body: Form(
@@ -191,7 +199,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: <Widget>[
           Padding(
             padding: inputFieldPadding,
             child: TextFormField(
@@ -314,6 +322,7 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             ),
           ),
           Padding(
+            key: _startDateKey,
             padding: inputFieldPadding,
             child: TextFormField(
               validator: (value) {
@@ -540,15 +549,19 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
             ),
           ),
           Padding(
+            key: _endDateKey,
             padding: inputFieldPadding,
             child: TextFormField(
               validator: (value) {
                 if (value == null || value.isEmpty) {
-                  return 'Working End Date cannot be empty!';
+                  return 'Working End Date is not choosen!';
                 }
                 return null;
               },
-              decoration: inputDecoration('End Date', 'Working End Date'),
+              decoration: inputDecoration(
+                'End Date',
+                'Working End Date',
+              ),
               controller: endDateController,
               readOnly: true,
               onTap: () async {
@@ -567,8 +580,15 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
           Padding(
             padding: inputFieldPadding,
             child: TextFormField(
+              key: _reportKey,
               controller: reportCreatorController,
               decoration: inputDecoration('Report Creator', 'Report Creator'),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Report Creator cannot be empty !';
+                }
+                return null;
+              },
             ),
           ),
           Padding(
@@ -627,41 +647,6 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
               secondary: const Icon(Icons.lightbulb_outline),
             ),
           ),
-          Padding(
-            padding: inputFieldPadding,
-            child: Container(
-              margin: EdgeInsets.only(left: 5, right: 5, bottom: 25, top: 10),
-              child: Center(
-                child: ElevatedButton.icon(
-                  // onPressed: () {
-                  //   if (_formKey2 != null) {
-                  //     print(3);
-                  //     if (_formKey2.currentState != null &&
-                  //         _formKey2.currentState!.validate()) {
-                  //       // Perform the action here, for example, saving the data
-                  //       print(2);
-                  //     }
-                  //   }
-                  // },
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Processing Data')),
-                      );
-                    }
-                  },
-                  icon: const Icon(Icons.save_as_outlined),
-                  label: const Text("SUBMIT"),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green,
-                    minimumSize: const Size.fromHeight(50),
-                    textStyle: const TextStyle(
-                        fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -676,46 +661,71 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
           const SizedBox(
             height: 20,
           ),
-          SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                Text('Analysis',
-                    style:
-                        TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
-                ZefyrToolbar.basic(
-                  controller: analysisController,
-                  hideLink: true,
-                  hideQuote: true,
-                  hideCodeBlock: true,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    height: 200,
-                    width: double.infinity,
-                    margin: const EdgeInsets.all(8.0),
-                    padding: const EdgeInsets.all(8.0),
-                    decoration: BoxDecoration(
-                        border: Border.all(color: Colors.blueAccent)),
-                    child: ZefyrEditor(
+          FormField<NotusDocument>(
+            initialValue: analysisController.document,
+            validator: (NotusDocument? value) {
+              // print(analysisController.document.toPlainText());
+              if (value!.toPlainText().trim().isEmpty) {
+                return 'Analysis cannot be empty!';
+              }
+              return null;
+            },
+            onSaved: (NotusDocument? value) {
+              // save the value
+            },
+            builder: (state) {
+              return SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    Text('Analysis',
+                        style: TextStyle(
+                            fontSize: 17, fontWeight: FontWeight.bold),
+                        textAlign: TextAlign.left),
+                    ZefyrToolbar.basic(
                       controller: analysisController,
-                      minHeight: 100,
+                      hideLink: true,
+                      hideQuote: true,
+                      hideCodeBlock: true,
                     ),
-                  ),
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Container(
+                        height: 200,
+                        width: double.infinity,
+                        margin: const EdgeInsets.all(8.0),
+                        padding: const EdgeInsets.all(8.0),
+                        decoration: BoxDecoration(
+                            border: Border.all(color: Colors.blueAccent)),
+                        child: ZefyrEditor(
+                          controller: analysisController,
+                          minHeight: 100,
+                        ),
+                      ),
+                    ),
+                    if (state.hasError)
+                      Text(
+                        state.errorText!,
+                        style: TextStyle(color: Colors.redAccent),
+                      ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           ),
           const SizedBox(
             height: 30,
           ),
           FormField<NotusDocument>(
-            // key: _formKey2,
-            validator: (value) {
-              if (value!.toPlainText().isEmpty) {
-                return 'Action cannot be empty';
+            initialValue: actionController.document,
+            validator: (NotusDocument? value) {
+              // print(actionController.document.toPlainText());
+              if (value!.toPlainText().trim().isEmpty) {
+                return 'Action cannot be empty!';
               }
               return null;
+            },
+            onSaved: (NotusDocument? value) {
+              // save the value
             },
             builder: (state) {
               return SingleChildScrollView(
@@ -746,6 +756,11 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                         ),
                       ),
                     ),
+                    if (state.hasError)
+                      Text(
+                        state.errorText!,
+                        style: TextStyle(color: Colors.redAccent),
+                      ),
                   ],
                 ),
               );
@@ -784,41 +799,9 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
               ],
             ),
           ),
-
           const SizedBox(
             height: 30,
           ),
-          // SingleChildScrollView(
-          //   physics: AlwaysScrollableScrollPhysics(),
-          //   child: Column(
-          //     children: <Widget>[
-          //       Text('Service Note',
-          //           style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
-          //           textAlign: TextAlign.left),
-          //       ZefyrToolbar.basic(
-          //         controller: serviceNoteController,
-          //         hideLink: true,
-          //         hideQuote: true,
-          //         hideCodeBlock: true,
-          //       ),
-          //       Padding(
-          //         padding: const EdgeInsets.all(8.0),
-          //         child: Container(
-          //           height: 200,
-          //           width: double.infinity,
-          //           margin: const EdgeInsets.all(8.0),
-          //           padding: const EdgeInsets.all(8.0),
-          //           decoration: BoxDecoration(
-          //               border: Border.all(color: Colors.blueAccent)),
-          //           child: ZefyrEditor(
-          //             controller: serviceNoteController,
-          //             minHeight: 100,
-          //           ),
-          //         ),
-          //       ),
-          //     ],
-          //   ),
-          // ),
         ],
       ),
     );

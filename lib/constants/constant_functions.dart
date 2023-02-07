@@ -15,4 +15,9 @@ class ConstantFunction {
     SharedPreferences pref = await SharedPreferences.getInstance();
     return pref.getInt('userId');
   }
+
+  getAPIToken() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    return pref.getString('apiToken');
+  }
 }

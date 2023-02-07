@@ -2,13 +2,19 @@ import 'dart:convert';
 
 import 'package:creative_mobile/config.dart';
 import 'package:http/http.dart' as http;
+import 'package:creative_mobile/constants/constant_functions.dart';
 
 class SubmitServiceReport {
+  ConstantFunction cf = new ConstantFunction();
+
   submitServiceReport(data) async {
     // var uri = Uri.http(Config.apiURL, Config.apiStoreSR);
-    var uri = Uri.http("192.168.4.56:8000", Config.apiStoreSR);
-
-    var response = await http.post(uri, body: {
+    var uri = Uri.http("192.168.4.173:8000", Config.apiStoreSR);
+    // print(await cf.getAPIToken());
+    var header = {
+      "Authorization": "Bearer ${await cf.getAPIToken()}",
+    };
+    var response = await http.post(uri, headers: header, body: {
       "spk_id": data['spk_id'],
       "request_number": data['request_number'],
       "user_id": data['user_id'],
@@ -31,5 +37,6 @@ class SubmitServiceReport {
     });
 
     var hasil = json.decode(response.body);
+    print(response.body + 'tes');
   }
 }

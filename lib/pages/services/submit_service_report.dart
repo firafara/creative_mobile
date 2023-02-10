@@ -1,3 +1,5 @@
+// ignore_for_file: unnecessary_new
+
 import 'dart:convert';
 
 import 'package:creative_mobile/config.dart';
@@ -10,7 +12,6 @@ class SubmitServiceReport {
   submitServiceReport(data) async {
     // var uri = Uri.http(Config.apiURL, Config.apiStoreSR);
     var uri = Uri.http("192.168.4.173:8000", Config.apiStoreSR);
-    // print(await cf.getAPIToken());
     var header = {
       "Authorization": "Bearer ${await cf.getAPIToken()}",
     };
@@ -35,8 +36,7 @@ class SubmitServiceReport {
       "unit_status_after_service": data['unit_status_after_service'],
       "need_parts_recommendation": data['need_parts_recommendation'],
     });
-
+    print(response.body);
     var hasil = json.decode(response.body);
-    print(response.body + 'tes');
   }
 }

@@ -152,8 +152,8 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                 ),
                                 onTap: () {
-                                  Navigator.pushNamedAndRemoveUntil(
-                                      context, '/update-hm', (route) => false);
+                                  Navigator.pushNamedAndRemoveUntil(context,
+                                      '/sr-add-photo', (route) => false);
                                 },
                               ),
                             ],

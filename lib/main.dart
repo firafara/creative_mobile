@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:creative_mobile/pages/home_page.dart';
 import 'package:creative_mobile/pages/login_page..dart';
 import 'package:creative_mobile/pages/services/service_report.dart';
+import 'package:creative_mobile/pages/services/service_report_add_photo.dart';
 import 'package:creative_mobile/pages/update_hm.dart';
 import 'package:creative_mobile/services/shared_service.dart';
 import 'package:flutter/material.dart';
@@ -44,6 +45,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomePage(),
         '/service-report': (context) => const ServiceReportPage(),
         '/update-hm': (context) => const HMPage(),
+        '/sr-add-photo': (context) => const ServiceReportAddPhotoPage(),
       },
       debugShowCheckedModeBanner: false,
     );

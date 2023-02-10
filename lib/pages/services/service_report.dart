@@ -1,4 +1,4 @@
-// ignore_for_file: non_constant_identifier_names, prefer_interpolation_to_compose_strings, unused_import, implementation_imports, unnecessary_import, depend_on_referenced_packages, unnecessary_new, body_might_complete_normally_nullable, prefer_const_constructors
+// ignore_for_file: non_constant_identifier_names, prefer_interpolation_to_compose_strings, unused_import, implementation_imports, unnecessary_import, depend_on_referenced_packages, unnecessary_new, body_might_complete_normally_nullable, prefer_const_constructors, unused_element
 
 import 'dart:convert';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
@@ -11,6 +11,7 @@ import 'package:creative_mobile/pages/services/submit_service_report.dart';
 import 'package:creative_mobile/services/shared_service.dart';
 import 'package:creative_mobile/services/spkdb.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/src/widgets/container.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:html_editor_enhanced/html_editor.dart';
@@ -20,6 +21,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_summernote/flutter_summernote.dart';
 import 'package:zefyrka/zefyrka.dart';
+// import 'package:quill_delta/quill_delta.dart';
+import 'package:flutter_html/flutter_html.dart';
 
 String? faultyValue;
 String? serviceStatusValue;
@@ -99,7 +102,70 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
     });
   }
 
+  // String bold = '\u0002';
+  // String numbered = '\u0003';
+  // String plain = '\u0000';
+
+  // String toHtml(String input) {
+  //   var lines = input.split('\n');
+  //   var html = '';
+  //   var isNumbered = false;
+  //   var isBold = false;
+  //   for (var i = 0; i < lines.length; i++) {
+  //     var line = lines[i];
+  //     if (line.startsWith(bold) && line.endsWith(bold)) {
+  //       html += '<b>' + line.substring(1, line.length - 1) + '</b>';
+  //       isBold = true;
+  //     } else if (line.startsWith(numbered)) {
+  //       html += '<ol><li>' + line.substring(1) + '</li>';
+  //       isNumbered = true;
+  //     } else if (line.endsWith(plain)) {
+  //       if (isBold) {
+  //         html += line.substring(0, line.length - 1) + '</b>';
+  //       } else if (isNumbered) {
+  //         html += line.substring(0, line.length - 1) + '</li></ol>';
+  //         isNumbered = false;
+  //       } else {
+  //         html += line.substring(0, line.length - 1);
+  //       }
+  //       isBold = false;
+  //     } else if (isNumbered) {
+  //       html += '<li>' + line + '</li>';
+  //     } else {
+  //       html += line;
+  //     }
+  //   }
+  //   return html;
+  // }
+
   void _submit() {
+    String analysisText = analysisController.document.toPlainText();
+    String analysisHtml = '';
+
+    if (analysisText.contains("\n")) {
+      analysisHtml = analysisText
+          .split("\n")
+          .map((line) => "<ol><li><b>" + line + "</b></li></ol>")
+          .join("");
+      print('if');
+    } else {
+      analysisHtml = analysisText;
+      print('else');
+    }
+
+    String actionText = actionController.document.toPlainText();
+    String actionHtml = '';
+
+    if (actionText.contains("\n")) {
+      actionHtml = actionText
+          .split("\n")
+          .map((line) => "<ol><li><b>" + line + "</b></li></ol>")
+          .join("");
+      print('if');
+    } else {
+      actionHtml = actionText;
+      print('else');
+    }
     Map<String, dynamic> inputValue = {
       "spk_id": spkIdController.text,
       "request_number": requestNumberController.text,
@@ -107,8 +173,8 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
       "service_start_date": startDateController.text,
       "service_category": serviceCategoryController.text,
       "service_complaints": complaintsController.text,
-      "service_analysis": analysisController.document.toPlainText(),
-      "service_action": actionController.document.toPlainText(),
+      "service_analysis": analysisHtml,
+      "service_action": actionHtml,
       "service_status": serviceStatusdropdownValue,
       "service_notes": serviceNoteController.document.toPlainText(),
       "service_end_date": endDateController.text,
@@ -120,15 +186,19 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
       "unit_hm": unitHmController.text,
       "unit_km": unitKmController.text,
       "unit_status_after_service": statusAfterdropdownValue,
-      "need_parts_recommendation": (isChecked == true) ? 1 : 0,
+      "need_parts_recommendation": (isChecked == true) ? "1" : "0",
     };
-    // if (_errorText == null) {
-    print('input value : ' + reportCreatorController.value.text);
-    // widget.onSubmit!(reportCreatorController.value.text);
+
     ssr.submitServiceReport(inputValue);
-    // }
-    // print(actionController.document.toPlainText());
+    print(inputValue);
   }
+
+  // String quillDeltaToHtml(Delta delta) {
+  //   final convertedValue = jsonEncode(delta.toJson());
+  //   final markdown = deltaToMarkdown(convertedValue);
+  //   final html = markdownToHtml(markdown);
+  //   return html;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -158,12 +228,17 @@ class _ServiceReportPageState extends State<ServiceReportPage> {
                 onPressed: () {
                   //  if (formKey1.currentState.validate() && formKey2.currentState.validate()) {
                   if (_formKey.currentState!.validate()) {
+                    // print('if');
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Processing Data')),
                     );
                     _submit();
+                    Navigator.pushNamed(context, '/sr-add-photo');
+
                     setState(() {});
-                  } else {}
+                  } else {
+                    print('else');
+                  }
                 },
                 icon: const Icon(
                   Icons.save_alt,

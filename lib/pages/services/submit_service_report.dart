@@ -10,8 +10,7 @@ class SubmitServiceReport {
   ConstantFunction cf = new ConstantFunction();
 
   submitServiceReport(data) async {
-    // var uri = Uri.http(Config.apiURL, Config.apiStoreSR);
-    var uri = Uri.http("192.168.4.173:8000", Config.apiStoreSR);
+    var uri = Uri.http("192.168.4.204:8000", Config.apiStoreSR);
     var header = {
       "Authorization": "Bearer ${await cf.getAPIToken()}",
     };

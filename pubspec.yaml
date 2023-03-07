@@ -51,8 +51,8 @@ dependencies:
   camera: ^0.10.3
   video_player: ^2.5.1
   image_picker: ^0.8.6+1
+  quill_delta: ^2.0.0
   # zefyr: ^1.0.0-dev.1.0
-  # quill_delta: ^1.0.0
 
 dev_dependencies:
   flutter_test:

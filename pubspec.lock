@@ -640,6 +640,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.2.4"
+  quill_delta:
+    dependency: "direct main"
+    description:
+      name: quill_delta
+      sha256: "7f591f7a441bc184858dc11fd84c576196292b200357b479ee4fd2930a14895f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   quill_format:
     dependency: transitive
     description:
@@ -656,6 +664,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.1"
+  quiver_hashcode:
+    dependency: transitive
+    description:
+      name: quiver_hashcode
+      sha256: "018f4653c308fa01069f524f556fc4f00ddb6e779a9309d0fc888813e74176ac"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.0.0"
   shared_preferences:
     dependency: "direct main"
     description:
